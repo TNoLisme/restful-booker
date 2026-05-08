@@ -1,0 +1,186 @@
+name: maven-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version (e.g. 2.0.0, 2.0.0.RC1)
+        required: true
+        default: 'X.X.X'
+      maven:
+        description: Publish to Maven Central
+        required: true
+        type: choice
+        options:
+          - 'enabled'
+          - 'disabled'
+      tests:
+        description: Run tests during build
+        required: true
+        type: choice
+        options:
+          - 'enabled'
+          - 'disabled'
+      cve_check:
+        description: OWASP CVE check (blocks on critical CVEs)
+        required: true
+        type: choice
+        options:
+          - 'enabled'
+          - 'disabled'
+      email_report:
+        description: Email CVE & SBOM report
+        required: true
+        type: choice
+        options:
+          - 'disabled'
+          - 'enabled'
+  schedule:
+    # Weekly CVE & SBOM scan on Saturdays (30 min after OpenSSF Scorecard)
+    - cron: '0 2 * * 6'
+
+permissions: read-all
+
+# Note: Docker image build has been removed from the release workflow.
+#
+# Karate v2 no longer ships an official karate-chrome Docker image.
+# Instead, v2's CDP driver works with any Chromium container via
+# Testcontainers and the PooledDriverProvider pattern:
+#
+#   public class ContainerDriverProvider extends PooledDriverProvider {
+#       protected Driver createDriver(Map<String, Object> config) {
+#           return CdpDriver.connect(container.getCdpUrl(), ...);
+#       }
+#   }
+#
+# Recommended images: chromedp/headless-shell (~200MB, fast),
+# selenium/standalone-chrome, or browserless/chrome.
+# See docs/DRIVER.md "Custom Provider (Testcontainers)" for details.
+#
+# For AI-powered browser testing, the commercial karate-agent Docker
+# container (karatelabs/karate-agent) provides a ready-to-use environment
+# with Chrome, VNC, and the Karate Agent server — enabling autonomous
+# browser and API testing via LLM agents (Claude Code, Cursor, etc.)
+# using a heredoc-over-HTTP API. See https://karatelabs.io for details.
+
+jobs:
+  release:
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: temurin
+          java-version: 21
+          server-id: central
+          server-username: CENTRAL_TOKEN_USERNAME
+          server-password: CENTRAL_TOKEN_PASSWORD
+          gpg-private-key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -B -ntp)
+          else
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set release version
+        if: github.event_name != 'schedule'
+        run: mvn versions:set versions:commit -B -ntp -DnewVersion=${{ steps.version.outputs.version }}
+
+      - name: Build and install
+        run: >
+          mvn -B -ntp clean install -Pcicd
+          ${{ (github.event_name == 'schedule' || github.event.inputs.tests == 'disabled') && '-DskipTests' || '' }}
+
+      - name: Restore NVD database cache
+        if: github.event_name == 'schedule' || github.event.inputs.cve_check == 'enabled'
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.dependency-check/data
+          key: nvd-db
+
+      - name: OWASP dependency check
+        if: github.event_name == 'schedule' || github.event.inputs.cve_check == 'enabled'
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: mvn -B -ntp dependency-check:check -Pdepcheck -DnvdApiKey=${NVD_API_KEY} -DossindexAnalyzerEnabled=false
+
+      - name: Generate CVE & SBOM report
+        if: always() && (github.event_name == 'schedule' || github.event.inputs.cve_check == 'enabled')
+        run: python3 etc/generate-cve-report.py --version ${{ steps.version.outputs.version }}
+
+      - name: Save NVD database cache
+        if: always() && (github.event_name == 'schedule' || github.event.inputs.cve_check == 'enabled')
+        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.dependency-check/data
+          key: nvd-db
+
+      - name: Upload CVE & SBOM report
+        if: always() && (github.event_name == 'schedule' || github.event.inputs.cve_check == 'enabled')
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: cve-sbom-report-${{ steps.version.outputs.version }}
+          retention-days: 10
+          path: |
+            target/cve-sbom-report.html
+            target/sbom.json
+            karate-core/target/dependency-check-report.json
+            karate-junit6/target/dependency-check-report.json
+            karate-gatling/target/dependency-check-report.json
+
+      - name: Email CVE & SBOM report
+        if: always() && (github.event_name == 'schedule' || github.event.inputs.email_report == 'enabled')
+        uses: dawidd6/action-send-mail@d38f3f7cd391cdebfe0d38efc3998b935e951c4f # v16
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: 465
+          secure: true
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Karate Weekly CVE & SBOM Report - ${{ steps.version.outputs.version }}"
+          to: ${{ secrets.CVE_ALERT_EMAIL }}
+          from: ${{ secrets.SMTP_USERNAME }}
+          body: "Weekly CVE & SBOM scan completed for Karate ${{ steps.version.outputs.version }}. See attached report."
+          attachments: target/cve-sbom-report.html,target/sbom.json
+
+      - name: Deploy to Maven Central
+        if: github.event_name != 'schedule' && github.event.inputs.maven == 'enabled'
+        env:
+          CENTRAL_TOKEN_USERNAME: ${{ secrets.OSSRH_TOKEN_USER }}
+          CENTRAL_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
+        run: mvn -B -ntp deploy -DskipTests -P release
+
+      - name: Build fatjar
+        if: github.event_name != 'schedule'
+        run: mvn -B -ntp package -DskipTests -P fatjar -f karate-core/pom.xml
+
+      - name: Package release ZIP
+        if: github.event_name != 'schedule'
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          mkdir -p target/karate-${VERSION}
+          cp karate-core/target/karate-${VERSION}.jar target/karate-${VERSION}/karate-${VERSION}.jar
+          cd target && zip -r karate-${VERSION}.zip karate-${VERSION}/
+
+      - name: Upload release ZIP
+        if: github.event_name != 'schedule'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: karate-release-${{ steps.version.outputs.version }}
+          retention-days: 10
+          path: target/karate-${{ steps.version.outputs.version }}.zip
