@@ -1,29 +1,49 @@
 Feature: Brute Force Security Test
 
-Scenario: Thử tất cả tổ hợp User/Pass và dừng lại khi tìm thấy Token
-  * def rawData = read('classpath:heroku/api/auth/data/pass_use.txt')
-  * def creds = karate.filter(rawData.split('\n'), function(x){ return x.trim().length > 0 })
-  * eval
-  """
-  for (let u of creds) {
-      for (let p of creds) {
-          let user = u.trim();
-          let pass = p.trim();
+Scenario: Try attack by user and password
 
-          let res = karate.http('https://restful-booker.herokuapp.com/auth').post({ 
-              username: user, 
-              password: pass 
-          });
+    * def rawData = read('classpath:heroku/api/auth/data/pass_use.txt')
+    * def creds = karate.filter(rawData.split('\n'), function(x){ return x.trim().length > 0 })
 
-          karate.log('Checking:', user, '/', pass);
+    * def securityBug = null
 
-          if (res.status == 200 && res.body.token) {
-              let errorMsg = '!!! SECURITY BUG FOUND !!!';
-              let credentials = 'User: ' + user + ' | Pass: ' + pass;
-              let tokenFound = 'Token: ' + res.body.token;
+    * eval
+    """
+    let found = false;
 
-              break outer;
-          }
-      }
-  }
-  """
+    for (let u of creds) {
+
+        if (found) break;
+
+        for (let p of creds) {
+
+            if (found) break;
+
+            let user = u.trim();
+            let pass = p.trim();
+
+            let res = karate.http('https://restful-booker.herokuapp.com/auth')
+                .post({
+                    username: user,
+                    password: pass
+                });
+
+            karate.log('Checking:', user, '/', pass);
+
+            if (res.status == 200 && res.body.token) {
+
+                securityBug = {
+                    user: user,
+                    pass: pass,
+                    token: res.body.token
+                };
+
+                found = true;
+            }
+        }
+    }
+    """
+
+    * print 'Security bug result:', securityBug
+
+    * match securityBug == null
