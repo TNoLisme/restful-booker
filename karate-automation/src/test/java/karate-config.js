@@ -21,7 +21,7 @@ function fn() {
 
   // DECLARATIVE AUTH: Sử dụng callSingle để lấy Token duy nhất 1 lần (Singleton)
   // Tính năng này gọi file feature phụ trợ và cache lại kết quả để dùng cho toàn bộ project
-  var result = karate.callSingle('classpath:booker/api/auth/login-helper.feature', config);
+  var result = karate.callSingle('classpath:booker/core/login-helper.feature', config);
   
   // Gắn token vào biến config để tất cả các kịch bản khác tự động có biến `authToken`
   config.authToken = result.authToken;

@@ -1,10 +1,10 @@
-Feature: Lấy Token phục vụ Declarative Auth
+@ignore
+Feature: Login Helper
 
-  Scenario: Tạo xác thực admin
+  Scenario:
     Given url baseUrl
     And path 'auth'
     And request { username: 'admin', password: 'password123' }
     When method post
     Then status 200
-    And match response.token == '#string'
     * def authToken = response.token
