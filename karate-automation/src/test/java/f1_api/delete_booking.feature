@@ -6,7 +6,7 @@ Feature: API DeleteBooking
 
   Scenario Outline: <id>. <desc>
     # 1. Prepare: Auto Create a booking for a fresh ID
-    * def res = karate.call('classpath:booker/custom/create-helper.feature', { payload: createPayload })
+    * def res = karate.call('classpath:f1_api/create-helper.feature', { payload: createPayload })
     * def validId = res.id
     * def targetId = <targetIdExpr>
 

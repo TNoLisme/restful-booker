@@ -2,7 +2,7 @@ Feature: API GetBooking
 
   Background:
     * url baseUrl
-    * def schema = read('classpath:booker/core/booking-schema.json')
+    * def schema = read('classpath:f1_api/booking-schema.json')
 
   Scenario: 0. Chuẩn bị dữ liệu (Lấy 1 ID hợp lệ)
     Given path 'booking'

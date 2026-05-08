@@ -5,7 +5,7 @@ Feature: API Auth (CreateToken)
 
   @setup
   Scenario:
-    * def fuzzer = call read('classpath:booker/core/fuzzing-helper.js')
+    * def fuzzer = call read('classpath:f1_api/fuzzing-helper.js')
     * def authData = fuzzer.getAuthFuzzData()
 
   Scenario Outline: <id>. Xác thực với <desc>

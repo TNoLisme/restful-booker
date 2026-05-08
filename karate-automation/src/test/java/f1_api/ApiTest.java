@@ -1,11 +1,9 @@
-package booker;
-
+package f1_api;
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-
-class BookerTest {
+class ApiTest {
 
     @Test
     void testAll() {
@@ -14,7 +12,7 @@ class BookerTest {
                             .format(java.time.LocalDateTime.now());
         String reportDir = "target/karate-reports_" + timestamp;
 
-        Results results = Runner.path("classpath:booker")
+        Results results = Runner.path("classpath:f1_api")
                 .outputHtmlReport(true)
                 .reportDir(reportDir) // Chỉ định thư mục báo cáo riêng biệt
                 .parallel(5);

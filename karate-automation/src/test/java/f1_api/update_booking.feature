@@ -2,12 +2,12 @@ Feature: API UpdateBooking
 
   Background:
     * url baseUrl
-    * def schema = read('classpath:booker/core/booking-schema.json')
+    * def schema = read('classpath:f1_api/booking-schema.json')
     * def createPayload = { firstname: 'Base', lastname: 'User', totalprice: 100, depositpaid: true, bookingdates: { checkin: '2024-01-01', checkout: '2024-01-10' } }
 
   Scenario Outline: <id>. <desc>
     # 1. Prepare: Auto Create a booking to get a fresh ID
-    * def res = karate.call('classpath:booker/custom/create-helper.feature', { payload: createPayload })
+    * def res = karate.call('classpath:f1_api/create-helper.feature', { payload: createPayload })
     * def bookingId = res.id
 
     # 2. Execute PUT

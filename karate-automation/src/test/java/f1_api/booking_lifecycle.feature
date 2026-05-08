@@ -14,7 +14,7 @@ Feature: Luồng Dòng dữ liệu "Sát thủ" (Data Flow & Clean up)
         depositpaid: true,
         bookingdates: { checkin: '2024-01-01', checkout: '2024-01-10' }
       };
-      var res = karate.call('classpath:booker/custom/create-helper.feature', { payload: payload });
+      var res = karate.call('classpath:f1_api/create-helper.feature', { payload: payload });
       createdIds.push(res.id);
     }
     """
@@ -31,9 +31,9 @@ Feature: Luồng Dòng dữ liệu "Sát thủ" (Data Flow & Clean up)
     And match response[*].bookingid contains createdIds
 
     # 3. Clean up: Xóa toàn bộ 5 cái để dọn rác
-    * def deleteAction = function(id){ karate.call('classpath:booker/custom/delete-helper.feature', { id: id }) }
+    * def deleteAction = function(id){ karate.call('classpath:f1_api/delete-helper.feature', { id: id }) }
     * karate.forEach(createdIds, deleteAction)
     
     # 4. Final Check: Đảm bảo không còn ID nào tồn tại
-    * def checkDeleted = function(id){ karate.call('classpath:booker/custom/check-deleted-helper.feature', { id: id }) }
+    * def checkDeleted = function(id){ karate.call('classpath:f1_api/check-deleted-helper.feature', { id: id }) }
     * karate.forEach(createdIds, checkDeleted)

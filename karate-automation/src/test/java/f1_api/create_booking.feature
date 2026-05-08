@@ -2,11 +2,11 @@ Feature: API CreateBooking
 
   Background:
     * url baseUrl
-    * def schema = read('classpath:booker/core/booking-schema.json')
+    * def schema = read('classpath:f1_api/booking-schema.json')
 
   @setup
   Scenario:
-    * def fuzzer = call read('classpath:booker/core/fuzzing-helper.js')
+    * def fuzzer = call read('classpath:f1_api/fuzzing-helper.js')
     * def createData = fuzzer.getCreateFuzzData()
 
   Scenario Outline: <id>. <desc>
