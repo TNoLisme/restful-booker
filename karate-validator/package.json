@@ -1,0 +1,19 @@
+{
+  "name": "karate-validator",
+  "version": "1.0.0",
+  "description": "Validate Karate DSL .feature files",
+  "main": "src/cli.js",
+  "bin": {
+    "karate-validator": "./src/cli.js"
+  },
+  "scripts": {
+    "validate": "node src/cli.js --validate",
+    "test": "node tests/run-tests.js"
+  },
+  "dependencies": {
+    "@cucumber/gherkin": "^27.0.0",
+    "@cucumber/messages": "^22.0.0",
+    "commander": "^11.0.0",
+    "glob": "^10.3.0"
+  }
+}
