@@ -164,6 +164,10 @@ const KarateReport = {
         html += `<span class="fw-bold">${this._esc(step.keyword)}</span> `;
         html += `<span>${this._esc(step.text)}</span>`;
 
+        if (step.hook) {
+            html += ` <span class="badge bg-secondary ms-1" title="lifecycle hook">hook</span>`;
+        }
+
         // Collapsed badges
         if (step.hasLogs) {
             html += ` <span class="badge bg-secondary ms-1 k-badge-collapsed" title="Has logs - click to expand">log</span>`;
@@ -313,6 +317,12 @@ const KarateReport = {
             data,
             theme: self.getTheme(),
 
+            get featureSimpleName() {
+                const p = (data.relativePath || data.path || data.name || '').toString();
+                const base = p.split('/').pop().split('\\').pop();
+                return base.replace(/\.feature$/, '') || 'Feature';
+            },
+
             toggleTheme() {
                 this.theme = self.toggleTheme();
             },
@@ -371,7 +381,13 @@ const KarateReport = {
             },
 
             get filteredFeatures() {
-                let features = [...(this.data.features || [])];
+                let features = (this.data.features || []).map(f => {
+                    const p = f.passedCount || 0;
+                    const fl = f.failedCount || 0;
+                    const executed = p + fl;
+                    const passRate = executed === 0 ? null : Math.round((p / executed) * 100);
+                    return Object.assign({}, f, { passRate });
+                });
                 features.sort((a, b) => {
                     let aVal = a[this.sortField];
                     let bVal = b[this.sortField];
@@ -381,6 +397,25 @@ const KarateReport = {
                     return this.sortDir === 'asc' ? cmp : -cmp;
                 });
                 return features;
+            },
+
+            get totals() {
+                const list = this.data.features || [];
+                const t = list.reduce((acc, f) => {
+                    acc.scenarios += (f.scenarioCount || 0);
+                    acc.passed += (f.passedCount || 0);
+                    acc.failed += (f.failedCount || 0);
+                    acc.skipped += (f.skippedCount || 0);
+                    acc.durationMillis += (f.durationMillis || 0);
+                    return acc;
+                }, { scenarios: 0, passed: 0, failed: 0, skipped: 0, durationMillis: 0 });
+                const executed = t.passed + t.failed;
+                t.passRate = executed === 0 ? null : Math.round((t.passed / executed) * 100);
+                return t;
+            },
+
+            formatPassRate(rate) {
+                return rate == null ? '\u2014' : rate + '%';
             },
 
             featureMatchesTags(feature) {

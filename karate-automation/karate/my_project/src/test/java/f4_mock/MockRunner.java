@@ -21,7 +21,7 @@ class MockRunner {
                     .parallel(1);
             assertEquals(0, results.getFailCount(), results.getErrorMessages());
         } finally {
-            server.stop().join();
+            server.stop();
         }
     }
 }
