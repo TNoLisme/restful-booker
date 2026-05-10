@@ -1,8 +1,6 @@
-# Restful Booker Karate Mock
+# Restful-Booker Karate Mock Server
 
-Mock server chay bang Karate feature: `restful_booker_mock.feature`.
-
-## Endpoint da mock
+Mock server nay bam theo API trong `API.md`:
 
 - `GET /ping`
 - `POST /auth`
@@ -13,30 +11,57 @@ Mock server chay bang Karate feature: `restful_booker_mock.feature`.
 - `PATCH /booking/{id}`
 - `DELETE /booking/{id}`
 
-Token hop le mac dinh:
+Moi API duoc tach thanh mot handler `.feature` rieng:
+
+- `ping.feature`
+- `auth.feature`
+- `booking_list.feature`
+- `booking_get.feature`
+- `booking_create.feature`
+- `booking_update.feature`
+- `booking_patch.feature`
+- `booking_delete.feature`
+- `reset.feature`
+
+`restful_booker_mock.feature` chi dong vai tro dispatcher, route request den dung handler.
+
+## Chay mock server
+
+Tu thu muc `karate-automation/karate/my_project`:
+
+```powershell
+mvn test-compile exec:java -Dexec.mainClass=f4_mock.RestfulBookerMockServer
+```
+
+Mac dinh server chay tai:
 
 ```text
-mock-token-12345
+http://localhost:9090
 ```
 
-## Chay smoke test
-
-Can dung JDK 21. Project dang bi loi voi JDK 26 do GraalJS cua Karate `1.5.0.RC1` khong tuong thich.
+Co the truyen port khac:
 
 ```powershell
-$env:JAVA_HOME='c:\Users\ngoth\.vscode\extensions\redhat.java-1.54.0-win32-x64\jre\21.0.10-win32-x86_64'
-$env:Path="$env:JAVA_HOME\bin;$env:Path"
-.\apache-maven-3.9.6\bin\mvn.cmd "-Dtest=f4_mock.MockRunner" test
+mvn test-compile exec:java -Dexec.mainClass=f4_mock.RestfulBookerMockServer -Dexec.args="3001"
 ```
 
-## Chay mock server thu cong
+## Auth
 
-Run class `f4_mock.RestfulBookerMockServer` trong IDE. Mac dinh server dung port `9090`; co the truyen port khac qua argument dau tien.
+`PUT`, `PATCH`, `DELETE` yeu cau mot trong hai cach:
 
-Khi server dang chay o `http://localhost:9090`, co the chay API tests voi env `mock`:
+- `Cookie: token=<token>` voi token lay tu `POST /auth`
+- `Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=`
+
+## Test nhanh
 
 ```powershell
-$env:JAVA_HOME='c:\Users\ngoth\.vscode\extensions\redhat.java-1.54.0-win32-x64\jre\21.0.10-win32-x86_64'
-$env:Path="$env:JAVA_HOME\bin;$env:Path"
-.\apache-maven-3.9.6\bin\mvn.cmd "-Dkarate.env=mock" "-Dtest=f1_api.ApiTest" test
+mvn test -Dtest=f4_mock.MockRunner
 ```
+
+Sau khi test pass, mo report tai:
+
+```text
+target/karate-reports/index.html
+```
+
+Mock co them endpoint tien ich `POST /reset` de dua du lieu test ve trang thai ban dau.

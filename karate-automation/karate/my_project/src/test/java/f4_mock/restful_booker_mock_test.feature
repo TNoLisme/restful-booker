@@ -1,61 +1,204 @@
-Feature: Restful Booker mock server smoke test
+Feature: Restful-Booker mock server smoke tests
 
-  Scenario: run CRUD flow against the Karate mock server
+  Background:
     * url karate.properties['mockBaseUrl']
 
+  Scenario: GET /ping returns 201
     Given path 'ping'
     When method get
     Then status 201
 
+  Scenario: POST /reset restores initial mock data
+    Given path 'reset'
+    When method post
+    Then status 200
+    And match response == { message: 'Data reset successful' }
+
+    Given path 'booking'
+    When method get
+    Then status 200
+    And match response == '#[5]'
+
+  Scenario: POST /auth returns token for valid credentials
     Given path 'auth'
     And request { username: 'admin', password: 'password123' }
     When method post
     Then status 200
     And match response == { token: '#string' }
-    * def token = response.token
+
+  Scenario: POST /auth returns bad credentials for invalid login
+    Given path 'auth'
+    And request { username: 'admin', password: 'wrong' }
+    When method post
+    Then status 200
+    And match response == { reason: 'Bad credentials' }
+
+  Scenario: GET /booking lists and filters booking IDs
+    Given path 'reset'
+    When method post
+    Then status 200
 
     Given path 'booking'
     When method get
     Then status 200
-    And match response == '#[]'
+    And match response == '#[5]'
+    And match each response == { bookingid: '#number' }
 
-    * def payload = { firstname: 'Mock', lastname: 'User', totalprice: 150, depositpaid: true, bookingdates: { checkin: '2026-05-09', checkout: '2026-05-10' }, additionalneeds: 'Breakfast' }
     Given path 'booking'
-    And header Accept = 'application/json'
+    And param firstname = 'Sally'
+    And param lastname = 'Brown'
+    When method get
+    Then status 200
+    And match response == [ { bookingid: 1 } ]
+
+  Scenario: GET /booking/{id} returns booking detail and 404
+    Given path 'reset'
+    When method post
+    Then status 200
+
+    Given path 'booking', 1
+    When method get
+    Then status 200
+    And match response ==
+      """
+      {
+        firstname: 'Sally',
+        lastname: 'Brown',
+        totalprice: 111,
+        depositpaid: true,
+        bookingdates: { checkin: '2013-02-23', checkout: '2014-10-23' },
+        additionalneeds: 'Breakfast'
+      }
+      """
+
+    Given path 'booking', 999999
+    When method get
+    Then status 404
+
+  Scenario: POST /booking creates a booking
+    * def payload =
+      """
+      {
+        firstname: 'Jim',
+        lastname: 'Brown',
+        totalprice: 111,
+        depositpaid: true,
+        bookingdates: { checkin: '2018-01-01', checkout: '2019-01-01' },
+        additionalneeds: 'Breakfast'
+      }
+      """
+    Given path 'booking'
     And request payload
     When method post
     Then status 200
-    And match response.booking == payload
-    * def bookingId = response.bookingid
+    And match response == { bookingid: '#number', booking: '#(payload)' }
 
-    Given path 'booking', bookingId
+    Given path 'booking', response.bookingid
     When method get
     Then status 200
     And match response == payload
 
-    * def updated = { firstname: 'Updated', lastname: 'User', totalprice: 175, depositpaid: false, bookingdates: { checkin: '2026-06-01', checkout: '2026-06-02' }, additionalneeds: 'Wifi' }
+  Scenario: PUT /booking/{id} requires auth and replaces booking
+    * def payload =
+      """
+      {
+        firstname: 'Put',
+        lastname: 'Before',
+        totalprice: 100,
+        depositpaid: true,
+        bookingdates: { checkin: '2018-01-01', checkout: '2019-01-01' },
+        additionalneeds: 'Breakfast'
+      }
+      """
+    * def updated =
+      """
+      {
+        firstname: 'Put',
+        lastname: 'After',
+        totalprice: 222,
+        depositpaid: false,
+        bookingdates: { checkin: '2018-02-01', checkout: '2019-02-01' },
+        additionalneeds: 'Dinner'
+      }
+      """
+    Given path 'auth'
+    And request { username: 'admin', password: 'password123' }
+    When method post
+    Then status 200
+    * def token = response.token
+
+    Given path 'booking'
+    And request payload
+    When method post
+    Then status 200
+    * def bookingId = response.bookingid
+
     Given path 'booking', bookingId
-    And header Accept = 'application/json'
-    And header Cookie = 'token=invalid'
     And request updated
     When method put
     Then status 403
 
     Given path 'booking', bookingId
-    And header Accept = 'application/json'
     And header Cookie = 'token=' + token
     And request updated
     When method put
     Then status 200
     And match response == updated
 
+  Scenario: PATCH /booking/{id} supports Basic Auth
+    * def payload =
+      """
+      {
+        firstname: 'Patch',
+        lastname: 'Before',
+        totalprice: 100,
+        depositpaid: true,
+        bookingdates: { checkin: '2018-01-01', checkout: '2019-01-01' },
+        additionalneeds: 'Breakfast'
+      }
+      """
+    Given path 'booking'
+    And request payload
+    When method post
+    Then status 200
+    * def bookingId = response.bookingid
+
     Given path 'booking', bookingId
-    And header Cookie = 'token=' + token
-    And request { firstname: 'Patched' }
+    And header Authorization = 'Basic YWRtaW46cGFzc3dvcmQxMjM='
+    And request { firstname: 'Patched', bookingdates: { checkout: '2019-03-01' } }
     When method patch
     Then status 200
     And match response.firstname == 'Patched'
-    And match response.lastname == 'User'
+    And match response.lastname == 'Before'
+    And match response.bookingdates == { checkin: '2018-01-01', checkout: '2019-03-01' }
+
+  Scenario: DELETE /booking/{id} requires auth and removes booking
+    * def payload =
+      """
+      {
+        firstname: 'Delete',
+        lastname: 'Me',
+        totalprice: 100,
+        depositpaid: true,
+        bookingdates: { checkin: '2018-01-01', checkout: '2019-01-01' },
+        additionalneeds: 'Breakfast'
+      }
+      """
+    Given path 'auth'
+    And request { username: 'admin', password: 'password123' }
+    When method post
+    Then status 200
+    * def token = response.token
+
+    Given path 'booking'
+    And request payload
+    When method post
+    Then status 200
+    * def bookingId = response.bookingid
+
+    Given path 'booking', bookingId
+    When method delete
+    Then status 403
 
     Given path 'booking', bookingId
     And header Cookie = 'token=' + token
@@ -66,7 +209,7 @@ Feature: Restful Booker mock server smoke test
     When method get
     Then status 404
 
-    Given path 'booking'
-    And param checkin = 'not-a-date'
-    When method get
-    Then status 400
+    Given path 'booking', 999999
+    And header Cookie = 'token=' + token
+    When method delete
+    Then status 405
