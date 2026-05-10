@@ -371,7 +371,7 @@ function App() {
   }
 
   return (
-    <div className="app-shell api-workspace">
+    <div className="app-shell api-workspace" data-testid="app-shell">
       <Sidebar
         activePage={activePage}
         isLoggedIn={Boolean(session)}
@@ -526,7 +526,7 @@ function Sidebar({ activePage, isLoggedIn, onLogout, onNavigate }) {
   ];
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" data-testid="sidebar">
       <div className="brand">
         <div className="brand-mark">
           <Hotel size={24} />
@@ -545,6 +545,7 @@ function Sidebar({ activePage, isLoggedIn, onLogout, onNavigate }) {
               className={
                 activePage === link.id ? "nav-item active" : "nav-item"
               }
+              data-testid={`nav-${link.id}`}
               key={link.id}
               onClick={() => onNavigate(link.id)}
               type="button"
@@ -557,12 +558,20 @@ function Sidebar({ activePage, isLoggedIn, onLogout, onNavigate }) {
       </nav>
 
       <div className="sidebar-footer">
-        <div className={isLoggedIn ? "session-card signed" : "session-card"}>
+        <div
+          className={isLoggedIn ? "session-card signed" : "session-card"}
+          data-testid="session-card"
+        >
           <User size={18} />
           <span>{isLoggedIn ? "Admin active" : "Guest mode"}</span>
         </div>
         {isLoggedIn && (
-          <button className="ghost-button" onClick={onLogout} type="button">
+          <button
+            className="ghost-button"
+            data-testid="logout-button"
+            onClick={onLogout}
+            type="button"
+          >
             <LogOut size={17} />
             Logout
           </button>
@@ -581,7 +590,7 @@ function LoginShell({
   toasts,
 }) {
   return (
-    <div className="login-shell">
+    <div className="login-shell" data-testid="login-shell">
       <motion.section
         animate={{ opacity: 1, y: 0 }}
         className="login-panel"
@@ -617,6 +626,7 @@ function LoginShell({
               ? "login-health online-state"
               : "login-health offline-state"
           }
+          data-testid="login-health"
         >
           <Server size={18} />
           {serverOnline ? "API server online" : "API server offline"}
@@ -691,6 +701,7 @@ function DashboardPage({ bookingCount, onNavigate, serverOnline, session }) {
           return (
             <button
               className="action-card"
+              data-testid={`action-${action.id}`}
               key={action.id}
               onClick={() => onNavigate(action.id)}
               type="button"
@@ -726,10 +737,10 @@ function MetricCard({ icon: Icon, label, value }) {
 
 function Topbar({ meta, session, serverOnline }) {
   return (
-    <header className="topbar compact-topbar">
+    <header className="topbar compact-topbar" data-testid="topbar">
       <div>
         <p className="eyebrow">{meta.eyebrow}</p>
-        <h1>{meta.title}</h1>
+        <h1 data-testid="page-title">{meta.title}</h1>
         <p className="page-description">{meta.description}</p>
       </div>
       <div className="topbar-actions">
@@ -748,7 +759,7 @@ function Topbar({ meta, session, serverOnline }) {
 
 function LoginPage({ credentials, isLoading, onChange, onSubmit, session }) {
   return (
-    <form className="glass-form api-card" onSubmit={onSubmit}>
+    <form className="glass-form api-card" data-testid="auth-form" onSubmit={onSubmit}>
       <SectionHeading
         icon={LogIn}
         eyebrow="Admin credentials"
@@ -758,6 +769,7 @@ function LoginPage({ credentials, isLoading, onChange, onSubmit, session }) {
         <label>
           Username
           <input
+            data-testid="login-username"
             onChange={(event) =>
               onChange({ ...credentials, username: event.target.value })
             }
@@ -767,6 +779,7 @@ function LoginPage({ credentials, isLoading, onChange, onSubmit, session }) {
         <label>
           Password
           <input
+            data-testid="login-password"
             onChange={(event) =>
               onChange({ ...credentials, password: event.target.value })
             }
@@ -778,7 +791,12 @@ function LoginPage({ credentials, isLoading, onChange, onSubmit, session }) {
       {session && (
         <div className="info-strip">Token active for admin operations.</div>
       )}
-      <SubmitButton icon={LogIn} isLoading={isLoading} label="Login" />
+      <SubmitButton
+        icon={LogIn}
+        isLoading={isLoading}
+        label="Login"
+        testId="login-submit"
+      />
     </form>
   );
 }
@@ -786,7 +804,7 @@ function LoginPage({ credentials, isLoading, onChange, onSubmit, session }) {
 function ListPage({ filters, isLoading, items, onChange, onSubmit }) {
   return (
     <div className="page-section">
-      <form className="glass-form api-card" onSubmit={onSubmit}>
+      <form className="glass-form api-card" data-testid="list-form" onSubmit={onSubmit}>
         <SectionHeading
           icon={ListFilter}
           eyebrow="Query parameters"
@@ -796,6 +814,7 @@ function ListPage({ filters, isLoading, items, onChange, onSubmit }) {
           <label>
             First name
             <input
+              data-testid="list-firstname"
               onChange={(event) =>
                 onChange({ ...filters, firstname: event.target.value })
               }
@@ -805,6 +824,7 @@ function ListPage({ filters, isLoading, items, onChange, onSubmit }) {
           <label>
             Last name
             <input
+              data-testid="list-lastname"
               onChange={(event) =>
                 onChange({ ...filters, lastname: event.target.value })
               }
@@ -814,6 +834,7 @@ function ListPage({ filters, isLoading, items, onChange, onSubmit }) {
           <label>
             Checkin
             <input
+              data-testid="list-checkin"
               onChange={(event) =>
                 onChange({ ...filters, checkin: event.target.value })
               }
@@ -824,6 +845,7 @@ function ListPage({ filters, isLoading, items, onChange, onSubmit }) {
           <label>
             Checkout
             <input
+              data-testid="list-checkout"
               onChange={(event) =>
                 onChange({ ...filters, checkout: event.target.value })
               }
@@ -836,10 +858,11 @@ function ListPage({ filters, isLoading, items, onChange, onSubmit }) {
           icon={Search}
           isLoading={isLoading}
           label="Get booking IDs"
+          testId="list-submit"
         />
       </form>
 
-      <div className="booking-table-wrap">
+      <div className="booking-table-wrap" data-testid="booking-table-wrap">
         <table className="booking-table api-table">
           <thead>
             <tr>
@@ -886,18 +909,28 @@ function ListPage({ filters, isLoading, items, onChange, onSubmit }) {
 function DetailPage({ booking, bookingId, isLoading, onIdChange, onSubmit }) {
   return (
     <div className="page-section">
-      <form className="glass-form api-card" onSubmit={onSubmit}>
+      <form className="glass-form api-card" data-testid="detail-form" onSubmit={onSubmit}>
         <SectionHeading
           icon={BookOpen}
           eyebrow="Path parameter"
           title="GET /booking/:id"
         />
-        <IdField label="Booking ID" onChange={onIdChange} value={bookingId} />
-        <SubmitButton icon={Search} isLoading={isLoading} label="Get detail" />
+        <IdField
+          label="Booking ID"
+          onChange={onIdChange}
+          testId="detail-id"
+          value={bookingId}
+        />
+        <SubmitButton
+          icon={Search}
+          isLoading={isLoading}
+          label="Get detail"
+          testId="detail-submit"
+        />
       </form>
 
       {booking && (
-        <div className="detail-grid api-detail">
+        <div className="detail-grid api-detail" data-testid="booking-detail">
           <Detail
             label="Guest"
             value={`${booking.firstname} ${booking.lastname}`}
@@ -934,21 +967,35 @@ function BookingWritePage({
   title,
 }) {
   return (
-    <form className="glass-form api-card" onSubmit={onSubmit}>
+    <form
+      className="glass-form api-card"
+      data-testid={method === "POST" ? "create-form" : "update-form"}
+      onSubmit={onSubmit}
+    >
       <SectionHeading
         icon={method === "POST" ? Plus : Save}
         eyebrow={`${method} payload`}
         title={title}
       />
       {bookingId !== undefined && (
-        <IdField label="Booking ID" onChange={onIdChange} value={bookingId} />
+        <IdField
+          label="Booking ID"
+          onChange={onIdChange}
+          testId={method === "POST" ? "create-id" : "update-id"}
+          value={bookingId}
+        />
       )}
       {requiresAuth && !session && <AuthWarning />}
-      <FormFields form={form} onChange={onChange} />
+      <FormFields
+        form={form}
+        onChange={onChange}
+        prefix={method === "POST" ? "create" : "update"}
+      />
       <SubmitButton
         icon={method === "POST" ? Plus : Save}
         isLoading={isLoading}
         label={method === "POST" ? "Create" : "Update full"}
+        testId={method === "POST" ? "create-submit" : "update-submit"}
       />
     </form>
   );
@@ -964,18 +1011,24 @@ function PatchPage({
   session,
 }) {
   return (
-    <form className="glass-form api-card" onSubmit={onSubmit}>
+    <form className="glass-form api-card" data-testid="patch-form" onSubmit={onSubmit}>
       <SectionHeading
         icon={Pencil}
         eyebrow="PATCH payload"
         title="Partial update"
       />
-      <IdField label="Booking ID" onChange={onIdChange} value={bookingId} />
+      <IdField
+        label="Booking ID"
+        onChange={onIdChange}
+        testId="patch-id"
+        value={bookingId}
+      />
       {!session && <AuthWarning />}
       <div className="form-grid">
         <label>
           First name
           <input
+            data-testid="patch-firstname"
             onChange={(event) =>
               onChange({ ...form, firstname: event.target.value })
             }
@@ -985,6 +1038,7 @@ function PatchPage({
         <label>
           Last name
           <input
+            data-testid="patch-lastname"
             onChange={(event) =>
               onChange({ ...form, lastname: event.target.value })
             }
@@ -994,6 +1048,7 @@ function PatchPage({
         <label>
           Total price
           <input
+            data-testid="patch-totalprice"
             onChange={(event) =>
               onChange({ ...form, totalprice: event.target.value })
             }
@@ -1002,21 +1057,31 @@ function PatchPage({
           />
         </label>
       </div>
-      <SubmitButton icon={Pencil} isLoading={isLoading} label="Patch booking" />
+      <SubmitButton
+        icon={Pencil}
+        isLoading={isLoading}
+        label="Patch booking"
+        testId="patch-submit"
+      />
     </form>
   );
 }
 
 function DeletePage({ bookingId, isLoading, onIdChange, onSubmit, session }) {
   return (
-    <form className="glass-form api-card danger-card" onSubmit={onSubmit}>
+    <form className="glass-form api-card danger-card" data-testid="delete-form" onSubmit={onSubmit}>
       <SectionHeading
         icon={Trash2}
         eyebrow="Danger operation"
         title="DELETE /booking/:id"
       />
       {!session && <AuthWarning />}
-      <IdField label="Booking ID" onChange={onIdChange} value={bookingId} />
+      <IdField
+        label="Booking ID"
+        onChange={onIdChange}
+        testId="delete-id"
+        value={bookingId}
+      />
       <div className="info-strip danger-info">
         This sends DELETE to the real API when the id exists remotely.
       </div>
@@ -1024,6 +1089,7 @@ function DeletePage({ bookingId, isLoading, onIdChange, onSubmit, session }) {
         icon={Trash2}
         isLoading={isLoading}
         label="Delete booking"
+        testId="delete-submit"
         variant="danger"
       />
     </form>
@@ -1032,7 +1098,7 @@ function DeletePage({ bookingId, isLoading, onIdChange, onSubmit, session }) {
 
 function PingPage({ isLoading, onSubmit, serverOnline }) {
   return (
-    <form className="glass-form api-card" onSubmit={onSubmit}>
+    <form className="glass-form api-card" data-testid="ping-form" onSubmit={onSubmit}>
       <SectionHeading
         icon={Activity}
         eyebrow="Health check"
@@ -1044,6 +1110,7 @@ function PingPage({ isLoading, onSubmit, serverOnline }) {
             ? "system-state online-state"
             : "system-state offline-state"
         }
+        data-testid="ping-state"
       >
         <Server size={34} />
         <strong>{serverOnline ? "Server online" : "Server offline"}</strong>
@@ -1052,17 +1119,19 @@ function PingPage({ isLoading, onSubmit, serverOnline }) {
         icon={Activity}
         isLoading={isLoading}
         label="Check server"
+        testId="ping-submit"
       />
     </form>
   );
 }
 
-function FormFields({ form, onChange }) {
+function FormFields({ form, onChange, prefix = "booking" }) {
   return (
     <div className="form-grid">
       <label>
         First name
         <input
+          data-testid={`${prefix}-firstname`}
           required
           onChange={(event) =>
             onChange({ ...form, firstname: event.target.value })
@@ -1073,6 +1142,7 @@ function FormFields({ form, onChange }) {
       <label>
         Last name
         <input
+          data-testid={`${prefix}-lastname`}
           required
           onChange={(event) =>
             onChange({ ...form, lastname: event.target.value })
@@ -1083,6 +1153,7 @@ function FormFields({ form, onChange }) {
       <label>
         Total price
         <input
+          data-testid={`${prefix}-totalprice`}
           min="1"
           onChange={(event) =>
             onChange({ ...form, totalprice: event.target.value })
@@ -1095,6 +1166,7 @@ function FormFields({ form, onChange }) {
       <label>
         Checkin
         <input
+          data-testid={`${prefix}-checkin`}
           onChange={(event) =>
             onChange({
               ...form,
@@ -1112,6 +1184,7 @@ function FormFields({ form, onChange }) {
       <label>
         Checkout
         <input
+          data-testid={`${prefix}-checkout`}
           onChange={(event) =>
             onChange({
               ...form,
@@ -1128,6 +1201,7 @@ function FormFields({ form, onChange }) {
       </label>
       <label className="toggle-row">
         <input
+          data-testid={`${prefix}-depositpaid`}
           checked={form.depositpaid}
           onChange={(event) =>
             onChange({ ...form, depositpaid: event.target.checked })
@@ -1139,6 +1213,7 @@ function FormFields({ form, onChange }) {
       <label className="wide">
         Additional needs
         <input
+          data-testid={`${prefix}-additionalneeds`}
           onChange={(event) =>
             onChange({ ...form, additionalneeds: event.target.value })
           }
@@ -1151,7 +1226,7 @@ function FormFields({ form, onChange }) {
 
 function ResponsePanel({ result, session, serverOnline }) {
   return (
-    <aside className="response-panel">
+    <aside className="response-panel" data-testid="response-panel">
       <div className="response-header">
         <div>
           <p className="eyebrow">API response</p>
@@ -1159,7 +1234,7 @@ function ResponsePanel({ result, session, serverOnline }) {
         </div>
         <FileJson size={22} />
       </div>
-      <pre>{JSON.stringify(result.data, null, 2)}</pre>
+      <pre data-testid="response-json">{JSON.stringify(result.data, null, 2)}</pre>
       <div className="response-meta">
         <span className={serverOnline ? "badge paid" : "badge due"}>
           {serverOnline ? "Online" : "Offline"}
@@ -1184,11 +1259,12 @@ function SectionHeading({ icon: Icon, eyebrow, title }) {
   );
 }
 
-function IdField({ label, onChange, value }) {
+function IdField({ label, onChange, testId, value }) {
   return (
     <label className="id-field">
       {label}
       <input
+        data-testid={testId}
         min="1"
         onChange={(event) => onChange(event.target.value)}
         required
@@ -1199,10 +1275,21 @@ function IdField({ label, onChange, value }) {
   );
 }
 
-function SubmitButton({ icon: Icon, isLoading, label, variant = "primary" }) {
+function SubmitButton({
+  icon: Icon,
+  isLoading,
+  label,
+  testId,
+  variant = "primary",
+}) {
   const className = variant === "danger" ? "danger-button" : "primary-button";
   return (
-    <button className={className} disabled={isLoading} type="submit">
+    <button
+      className={className}
+      data-testid={testId}
+      disabled={isLoading}
+      type="submit"
+    >
       {isLoading ? <Loader2 className="spin" size={17} /> : <Icon size={17} />}
       {label}
     </button>
@@ -1228,12 +1315,13 @@ function Detail({ label, value }) {
 
 function ToastStack({ toasts }) {
   return (
-    <div className="toast-stack">
+    <div className="toast-stack" data-testid="toast-stack">
       <AnimatePresence>
         {toasts.map((toast) => (
           <motion.div
             animate={{ opacity: 1, y: 0 }}
             className={toast.type === "error" ? "toast error" : "toast"}
+            data-testid="toast"
             exit={{ opacity: 0, y: 12 }}
             initial={{ opacity: 0, y: 12 }}
             key={toast.id}

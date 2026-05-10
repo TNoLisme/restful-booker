@@ -9,16 +9,7 @@ class UiTest {
     @Test
     void testUi() {
         Results results = Runner.path("classpath:f3_ui")
-                .outputHtmlReport(true)
-                .parallel(1);
-        assertEquals(0, results.getFailCount(), results.getErrorMessages());
-    }
-}
-
-class ApiTest {
-    @Test
-    void testApi() {
-        Results results = Runner.path("classpath:f1_api")
+                .karateEnv("ui")
                 .outputHtmlReport(true)
                 .parallel(1);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());

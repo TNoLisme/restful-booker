@@ -1,38 +1,41 @@
 function fn() {
-  var env = karate.env; // Lấy biến môi trường 'karate.env' (ví dụ: dev, staging)
-  karate.log('Môi trường hiện tại (karate.env) là:', env);
-  
+  var env = karate.env;
+  karate.log('karate.env:', env);
+
   if (!env) {
     env = 'dev';
   }
-  
+
   var config = {
     env: env,
-    baseUrl: 'http://localhost:3001'
+    baseUrl: 'http://localhost:3001',
+    webUrl: 'http://localhost:5173'
   };
 
   if (env === 'e2e') {
     config.baseUrl = 'https://restful-booker.herokuapp.com';
+    config.webUrl = 'https://restful-booker.herokuapp.com';
   }
 
   if (env === 'mock') {
     config.baseUrl = 'http://localhost:9090';
+    config.webUrl = 'http://localhost:5173';
   }
 
-  // Cấu hình timeout mặc định
   karate.configure('connectTimeout', 5000);
   karate.configure('readTimeout', 5000);
 
-  // DECLARATIVE AUTH: Sử dụng callSingle để lấy Token duy nhất 1 lần (Singleton)
-  // Tính năng này gọi file feature phụ trợ và cache lại kết quả để dùng cho toàn bộ project
+  if (env === 'ui') {
+    config.authToken = null;
+    return config;
+  }
+
   if (env === 'mock-test') {
     config.authToken = 'mock-token-12345';
     return config;
   }
 
   var result = karate.callSingle('classpath:f1_api/login-helper.feature', config);
-  
-  // Gắn token vào biến config để tất cả các kịch bản khác tự động có biến `authToken`
   config.authToken = result.authToken;
 
   return config;

@@ -98,8 +98,8 @@
     <script src="res/bootstrap.bundle.min.js"></script>
     <script src="res/karate-report.js"></script>
     <script id="karate-data" type="application/json">{
-  "env": null,
-  "reportDate": "2026-05-10 17:26:37",
+  "env": "ui",
+  "reportDate": "2026-05-10 19:09:28",
   "threads": 1,
   "karateVersion": "2.0.8",
   "groups": [
@@ -112,469 +112,199 @@
     {
       "id": 1,
       "group": 1,
-      "content": "create_token_boundary[1.1:9]",
-      "start": 1778408798006,
-      "end": 1778408799453,
-      "title": "create_token_boundary[1.1:9] 17:26:38.006 (1448 ms) TOKEN1",
+      "content": "ui_auth[1:6]",
+      "start": 1778414968522,
+      "end": 1778414971545,
+      "title": "ui_auth[1:6] 19:09:28.522 (3024 ms) Login success and logout",
       "className": "passed"
     },
     {
       "id": 2,
       "group": 1,
-      "content": "create_token_boundary[1.2:9]",
-      "start": 1778408799454,
-      "end": 1778408800542,
-      "title": "create_token_boundary[1.2:9] 17:26:39.454 (1089 ms) TOKEN2",
+      "content": "ui_auth[2:21]",
+      "start": 1778414971547,
+      "end": 1778414972901,
+      "title": "ui_auth[2:21] 19:09:31.547 (1355 ms) Invalid login stays on login screen and reports error",
       "className": "passed"
     },
     {
       "id": 3,
       "group": 1,
-      "content": "create_token_boundary[1.3:9]",
-      "start": 1778408800543,
-      "end": 1778408801567,
-      "title": "create_token_boundary[1.3:9] 17:26:40.543 (1025 ms) TOKEN3",
+      "content": "ui_booking_read[1:24]",
+      "start": 1778414972968,
+      "end": 1778414976413,
+      "title": "ui_booking_read[1:24] 19:09:32.968 (3446 ms) List bookings with empty, firstname, lastname and date filters",
       "className": "passed"
     },
     {
       "id": 4,
       "group": 1,
-      "content": "create_token_boundary[1.4:9]",
-      "start": 1778408801569,
-      "end": 1778408802536,
-      "title": "create_token_boundary[1.4:9] 17:26:41.569 (968 ms) TOKEN4",
+      "content": "ui_booking_read[2:55]",
+      "start": 1778414976416,
+      "end": 1778414979581,
+      "title": "ui_booking_read[2:55] 19:09:36.416 (3166 ms) Get booking detail by id and report not found id",
       "className": "passed"
     },
     {
       "id": 5,
       "group": 1,
-      "content": "security1[1:2]",
-      "start": 1778408802550,
-      "end": 1778408803625,
-      "title": "security1[1:2] 17:26:42.550 (1076 ms) SQL Injection attempt",
+      "content": "ui_booking_write[1:6]",
+      "start": 1778414979589,
+      "end": 1778414985608,
+      "title": "ui_booking_write[1:6] 19:09:39.589 (6020 ms) Create, update, patch and delete a booking from the UI",
       "className": "passed"
     },
     {
       "id": 6,
       "group": 1,
-      "content": "security2[1:3]",
-      "start": 1778408803626,
-      "end": 1778408804688,
-      "title": "security2[1:3] 17:26:43.626 (1063 ms) NoSQL Injection attempt",
+      "content": "ui_defect_discovery[1:6]",
+      "start": 1778414985616,
+      "end": 1778414986571,
+      "title": "ui_defect_discovery[1:6] 19:09:45.616 (956 ms) Invalid login must not open the dashboard",
       "className": "passed"
     },
     {
       "id": 7,
       "group": 1,
-      "content": "security3[1:3]",
-      "start": 1778408804689,
-      "end": 1778408805693,
-      "title": "security3[1:3] 17:26:44.689 (1005 ms) NoSQL Injection attempt",
+      "content": "ui_defect_discovery[2:15]",
+      "start": 1778414986575,
+      "end": 1778414987843,
+      "title": "ui_defect_discovery[2:15] 19:09:46.575 (1269 ms) Create form with missing required firstname is invalid",
       "className": "passed"
     },
     {
       "id": 8,
       "group": 1,
-      "content": "security4[1:3]",
-      "start": 1778408805697,
-      "end": 1778408806699,
-      "title": "security4[1:3] 17:26:45.697 (1003 ms) User enumeration check",
+      "content": "ui_defect_discovery[3:26]",
+      "start": 1778414987844,
+      "end": 1778414991201,
+      "title": "ui_defect_discovery[3:26] 19:09:47.844 (3358 ms) Update and delete unknown booking ids report errors",
       "className": "passed"
     },
     {
       "id": 9,
       "group": 1,
-      "content": "security4[2:9]",
-      "start": 1778408806701,
-      "end": 1778408807709,
-      "title": "security4[2:9] 17:26:46.701 (1009 ms) Non-existing user",
-      "className": "passed"
+      "content": "ui_defect_discovery[4:48]",
+      "start": 1778414991203,
+      "end": 1778414991973,
+      "title": "ui_defect_discovery[4:48] 19:09:51.203 (771 ms) Expected defect - sidebar labels should match their API pages",
+      "className": "failed"
     },
     {
       "id": 10,
       "group": 1,
-      "content": "security5[1:3]",
-      "start": 1778408807726,
-      "end": 1778408808952,
-      "title": "security5[1:3] 17:26:47.726 (1227 ms) Timing attack check",
-      "className": "passed"
+      "content": "ui_defect_discovery[5:56]",
+      "start": 1778414991976,
+      "end": 1778414992448,
+      "title": "ui_defect_discovery[5:56] 19:09:51.976 (473 ms) Expected defect - landing target blank links should protect opener",
+      "className": "failed"
     },
     {
       "id": 11,
       "group": 1,
-      "content": "security6[1:3]",
-      "start": 1778408808953,
-      "end": 1778408810186,
-      "title": "security6[1:3] 17:26:48.953 (1234 ms) Token should be random",
+      "content": "ui_landing_3001[1:6]",
+      "start": 1778414992456,
+      "end": 1778414992732,
+      "title": "ui_landing_3001[1:6] 19:09:52.456 (277 ms) Landing page content, buttons, links and assets render",
       "className": "passed"
     },
     {
       "id": 12,
       "group": 1,
-      "content": "security7[1:3]",
-      "start": 1778408810192,
-      "end": 1778408903782,
-      "title": "security7[1:3] 17:26:50.192 (93591 ms) Try attack by user and password",
-      "className": "failed"
+      "content": "ui_landing_3001[2:29]",
+      "start": 1778414992733,
+      "end": 1778414994099,
+      "title": "ui_landing_3001[2:29] 19:09:52.733 (1367 ms) Internal API Docs links open and browser can return to landing page",
+      "className": "passed"
     },
     {
       "id": 13,
       "group": 1,
-      "content": "bookingGet1[1:7]",
-      "start": 1778408903792,
-      "end": 1778408903801,
-      "title": "bookingGet1[1:7] 17:28:23.792 (10 ms) GBK-EP-01 - Get booking detail by id",
+      "content": "ui_landing_3001[3:44]",
+      "start": 1778414994100,
+      "end": 1778414998393,
+      "title": "ui_landing_3001[3:44] 19:09:54.100 (4294 ms) Header external links are clickable and can return to landing page",
       "className": "passed"
     },
     {
       "id": 14,
       "group": 1,
-      "content": "bookingGet1[2:28]",
-      "start": 1778408903803,
-      "end": 1778408903805,
-      "title": "bookingGet1[2:28] 17:28:23.803 (3 ms) GBK-EP2-02 - Miền dữ liệu không hợp lệ",
+      "content": "ui_landing_3001[4:75]",
+      "start": 1778414998394,
+      "end": 1778414998587,
+      "title": "ui_landing_3001[4:75] 19:09:58.394 (194 ms) Ministry text support link fires click with the expected external URL",
       "className": "passed"
     },
     {
       "id": 15,
       "group": 1,
-      "content": "bookingGet1[3:33]",
-      "start": 1778408903807,
-      "end": 1778408903811,
-      "title": "bookingGet1[3:33] 17:28:23.807 (5 ms) GBK-BVA-01- Min+",
+      "content": "ui_landing_3001[5:86]",
+      "start": 1778414998589,
+      "end": 1778414998801,
+      "title": "ui_landing_3001[5:86] 19:09:58.589 (213 ms) AI book image link fires click with the expected external URL",
       "className": "passed"
     },
     {
       "id": 16,
       "group": 1,
-      "content": "bookingGet1[4:53]",
-      "start": 1778408903813,
-      "end": 1778408903818,
-      "title": "bookingGet1[4:53] 17:28:23.813 (6 ms) GBK-BVA-02- nom",
+      "content": "ui_landing_3001[6:97]",
+      "start": 1778414998803,
+      "end": 1778414998999,
+      "title": "ui_landing_3001[6:97] 19:09:58.803 (197 ms) Testing Web APIs book image link fires click with the expected external URL",
       "className": "passed"
     },
     {
       "id": 17,
       "group": 1,
-      "content": "bookingGet1[5:73]",
-      "start": 1778408903820,
-      "end": 1778408903825,
-      "title": "bookingGet1[5:73] 17:28:23.820 (6 ms) GBK-BVA-03- Max-",
+      "content": "ui_landing_3001[7:108]",
+      "start": 1778414999001,
+      "end": 1778414999186,
+      "title": "ui_landing_3001[7:108] 19:09:59.001 (186 ms) Ministry Pro image link fires click with the expected external URL",
       "className": "passed"
     },
     {
       "id": 18,
       "group": 1,
-      "content": "bookingGet1[6:93]",
-      "start": 1778408903827,
-      "end": 1778408903831,
-      "title": "bookingGet1[6:93] 17:28:23.827 (5 ms) GBK-BVA-04- Max",
+      "content": "ui_landing_3001[8:119]",
+      "start": 1778414999187,
+      "end": 1778414999886,
+      "title": "ui_landing_3001[8:119] 19:09:59.187 (700 ms) Sign In opens the React UI login screen",
       "className": "passed"
     },
     {
       "id": 19,
       "group": 1,
-      "content": "bookingGet2[1:6]",
-      "start": 1778408903836,
-      "end": 1778408903842,
-      "title": "bookingGet2[1:6] 17:28:23.836 (7 ms) GBK-EP-01  get booking ids and validate response",
+      "content": "ui_navigation[1:6]",
+      "start": 1778414999890,
+      "end": 1778415001259,
+      "title": "ui_navigation[1:6] 19:09:59.890 (1370 ms) Sidebar pages render the expected screen",
       "className": "passed"
     },
     {
       "id": 20,
       "group": 1,
-      "content": "bookingGet2[2:15]",
-      "start": 1778408903844,
-      "end": 1778408903852,
-      "title": "bookingGet2[2:15] 17:28:23.844 (9 ms) GBK-EP-02 - Filter theo firstname tồn tại",
-      "className": "failed"
+      "content": "ui_navigation[2:41]",
+      "start": 1778415001263,
+      "end": 1778415002906,
+      "title": "ui_navigation[2:41] 19:10:01.263 (1644 ms) Dashboard action cards navigate to API pages",
+      "className": "passed"
     },
     {
       "id": 21,
       "group": 1,
-      "content": "bookingGet2[3:23]",
-      "start": 1778408903854,
-      "end": 1778408903859,
-      "title": "bookingGet2[3:23] 17:28:23.854 (6 ms) GBK-EP-03 - Filter theo lastname tồn tại",
+      "content": "ui_ping[1:6]",
+      "start": 1778415002908,
+      "end": 1778415003742,
+      "title": "ui_ping[1:6] 19:10:02.908 (835 ms) Ping page shows API health result",
       "className": "passed"
     },
     {
       "id": 22,
       "group": 1,
-      "content": "bookingGet2[4:31]",
-      "start": 1778408903861,
-      "end": 1778408903866,
-      "title": "bookingGet2[4:31] 17:28:23.861 (6 ms) GBK-EP-04 - Filter kết hợp firstname + lastname",
-      "className": "passed"
-    },
-    {
-      "id": 23,
-      "group": 1,
-      "content": "bookingGet2[5:41]",
-      "start": 1778408903868,
-      "end": 1778408903870,
-      "title": "bookingGet2[5:41] 17:28:23.868 (3 ms) GBK-EP-05 - Filter không khớp bất kỳ record nào",
-      "className": "passed"
-    },
-    {
-      "id": 24,
-      "group": 1,
-      "content": "bookingGet2[6:50]",
-      "start": 1778408903872,
-      "end": 1778408903877,
-      "title": "bookingGet2[6:50] 17:28:23.872 (6 ms) GBK-BVA-01 - firstname = chuỗi 1 ký tự",
-      "className": "passed"
-    },
-    {
-      "id": 25,
-      "group": 1,
-      "content": "bookingGet2[7:57]",
-      "start": 1778408903879,
-      "end": 1778408903883,
-      "title": "bookingGet2[7:57] 17:28:23.879 (5 ms) GBK-BVA-02 - firstname = chuỗi rỗng",
-      "className": "passed"
-    },
-    {
-      "id": 26,
-      "group": 1,
-      "content": "bookingGet2[8:64]",
-      "start": 1778408903885,
-      "end": 1778408903888,
-      "title": "bookingGet2[8:64] 17:28:23.885 (4 ms) GBK-BVA-03 - checkin ngày hợp lệ đúng format",
-      "className": "passed"
-    },
-    {
-      "id": 27,
-      "group": 1,
-      "content": "bookingGet2[9:71]",
-      "start": 1778408903891,
-      "end": 1778408903902,
-      "title": "bookingGet2[9:71] 17:28:23.891 (12 ms) GBK-BVA-04 - checkin sai định dạng",
-      "className": "failed"
-    },
-    {
-      "id": 28,
-      "group": 1,
-      "content": "bookingGet2[10:77]",
-      "start": 1778408903906,
-      "end": 1778408903911,
-      "title": "bookingGet2[10:77] 17:28:23.906 (6 ms) GBK-BVA-05 - checkout nhỏ hơn checkin",
-      "className": "passed"
-    },
-    {
-      "id": 29,
-      "group": 1,
-      "content": "createBooking[1:8]",
-      "start": 1778408903916,
-      "end": 1778408903921,
-      "title": "createBooking[1:8] 17:28:23.916 (6 ms) CBK-EP-01 - Đầy đủ field hợp lệ",
-      "className": "passed"
-    },
-    {
-      "id": 30,
-      "group": 1,
-      "content": "createBooking[2:47]",
-      "start": 1778408903924,
-      "end": 1778408903930,
-      "title": "createBooking[2:47] 17:28:23.924 (7 ms) CBK-EP-02 - Thiếu firstname",
-      "className": "passed"
-    },
-    {
-      "id": 31,
-      "group": 1,
-      "content": "createBooking[3:65]",
-      "start": 1778408903933,
-      "end": 1778408903938,
-      "title": "createBooking[3:65] 17:28:23.933 (6 ms) CBK-EP-03 - Thiếu bookingdates",
-      "className": "passed"
-    },
-    {
-      "id": 32,
-      "group": 1,
-      "content": "createBooking[4:80]",
-      "start": 1778408903940,
-      "end": 1778408903944,
-      "title": "createBooking[4:80] 17:28:23.940 (5 ms) CBK-EP-04 - depositpaid = false",
-      "className": "passed"
-    },
-    {
-      "id": 33,
-      "group": 1,
-      "content": "createBooking[5:101]",
-      "start": 1778408903946,
-      "end": 1778408903950,
-      "title": "createBooking[5:101] 17:28:23.946 (5 ms) CBK-EP-05 - totalprice sai kiểu dữ liệu",
-      "className": "passed"
-    },
-    {
-      "id": 34,
-      "group": 1,
-      "content": "deleteBooking[1:22]",
-      "start": 1778408903954,
-      "end": 1778408905227,
-      "title": "deleteBooking[1:22] 17:28:23.954 (1274 ms) DEL-EP-01 xoá thành công với token hợp lệ",
-      "className": "passed"
-    },
-    {
-      "id": 35,
-      "group": 1,
-      "content": "deleteBooking[2:30]",
-      "start": 1778408905229,
-      "end": 1778408906476,
-      "title": "deleteBooking[2:30] 17:28:25.229 (1248 ms) DEL-EP-02 xoá không hợp lệ: không có token",
-      "className": "passed"
-    },
-    {
-      "id": 36,
-      "group": 1,
-      "content": "deleteBooking[3:37]",
-      "start": 1778408906478,
-      "end": 1778408907752,
-      "title": "deleteBooking[3:37] 17:28:26.478 (1275 ms) DEL-EP-03 xoá không hợp lệ: token sai",
-      "className": "passed"
-    },
-    {
-      "id": 37,
-      "group": 1,
-      "content": "deleteBooking[4:45]",
-      "start": 1778408907754,
-      "end": 1778408909185,
-      "title": "deleteBooking[4:45] 17:28:27.754 (1432 ms) DEL-EP-04 xoá booking đã bị xoá",
-      "className": "passed"
-    },
-    {
-      "id": 38,
-      "group": 1,
-      "content": "deleteBooking[5:60]",
-      "start": 1778408909186,
-      "end": 1778408910403,
-      "title": "deleteBooking[5:60] 17:28:29.186 (1218 ms) DEL-EP-05 xoá booking không tồn tại",
-      "className": "passed"
-    },
-    {
-      "id": 39,
-      "group": 1,
-      "content": "updateBooking[1:20]",
-      "start": 1778408910404,
-      "end": 1778408911766,
-      "title": "updateBooking[1:20] 17:28:30.404 (1363 ms) UPD-EP-01 cập nhật hợp lệ",
-      "className": "failed"
-    },
-    {
-      "id": 40,
-      "group": 1,
-      "content": "updateBooking[2:38]",
-      "start": 1778408911767,
-      "end": 1778408913050,
-      "title": "updateBooking[2:38] 17:28:31.767 (1284 ms) UPD-EP-02 cập nhật không hợp lệ: không có token",
-      "className": "failed"
-    },
-    {
-      "id": 41,
-      "group": 1,
-      "content": "updateBooking[3:52]",
-      "start": 1778408913055,
-      "end": 1778408914373,
-      "title": "updateBooking[3:52] 17:28:33.055 (1319 ms) UPD-EP-03 cập nhật không hợp lệ: Token sai",
-      "className": "failed"
-    },
-    {
-      "id": 42,
-      "group": 1,
-      "content": "updateBooking[4:66]",
-      "start": 1778408914374,
-      "end": 1778408915665,
-      "title": "updateBooking[4:66] 17:28:34.374 (1292 ms) UPD-EP-04 cập nhật không hợp lệ: Booking không tồn tại",
-      "className": "failed"
-    },
-    {
-      "id": 43,
-      "group": 1,
-      "content": "updateBooking[5:80]",
-      "start": 1778408915666,
-      "end": 1778408916904,
-      "title": "updateBooking[5:80] 17:28:35.666 (1239 ms) UPD-EP-05 cập nhật không hợp lệ: Body thiếu",
-      "className": "failed"
-    },
-    {
-      "id": 44,
-      "group": 1,
-      "content": "updateBooking2[1:20]",
-      "start": 1778408916907,
-      "end": 1778408918139,
-      "title": "updateBooking2[1:20] 17:28:36.907 (1233 ms) PAT-EP-01 cập nhật 1 field",
-      "className": "failed"
-    },
-    {
-      "id": 45,
-      "group": 1,
-      "content": "updateBooking2[2:46]",
-      "start": 1778408918140,
-      "end": 1778408919411,
-      "title": "updateBooking2[2:46] 17:28:38.140 (1272 ms) PAT-EP-02 cập nhật nhiều field cùng lúc",
-      "className": "failed"
-    },
-    {
-      "id": 46,
-      "group": 1,
-      "content": "updateBooking2[3:74]",
-      "start": 1778408919413,
-      "end": 1778408920691,
-      "title": "updateBooking2[3:74] 17:28:39.413 (1279 ms) PAT-EP-03 cập nhật không hợp lệ: không có token",
-      "className": "passed"
-    },
-    {
-      "id": 47,
-      "group": 1,
-      "content": "updateBooking2[4:88]",
-      "start": 1778408920693,
-      "end": 1778408921946,
-      "title": "updateBooking2[4:88] 17:28:40.693 (1254 ms) PAT-EP-04 field không tồn tại trong schema",
-      "className": "failed"
-    },
-    {
-      "id": 48,
-      "group": 1,
-      "content": "updateBooking2[5:107]",
-      "start": 1778408921947,
-      "end": 1778408923185,
-      "title": "updateBooking2[5:107] 17:28:41.947 (1239 ms) PAT-BVA-01 body rỗng {}",
-      "className": "failed"
-    },
-    {
-      "id": 49,
-      "group": 1,
-      "content": "updateBooking2[6:120]",
-      "start": 1778408923187,
-      "end": 1778408924575,
-      "title": "updateBooking2[6:120] 17:28:43.187 (1389 ms) PAT-BVA-02 firstname là chuỗi rỗng",
-      "className": "passed"
-    },
-    {
-      "id": 50,
-      "group": 1,
-      "content": "updateBooking2[7:138]",
-      "start": 1778408924576,
-      "end": 1778408925956,
-      "title": "updateBooking2[7:138] 17:28:44.576 (1381 ms) PAT-BVA-03 totalprice = 0",
-      "className": "failed"
-    },
-    {
-      "id": 51,
-      "group": 1,
-      "content": "ping[1:8]",
-      "start": 1778408925960,
-      "end": 1778408926969,
-      "title": "ping[1:8] 17:28:45.960 (1010 ms) PNG-EP-01 Health check cơ bản",
-      "className": "passed"
-    },
-    {
-      "id": 52,
-      "group": 1,
-      "content": "ping[2:17]",
-      "start": 1778408926970,
-      "end": 1778408928006,
-      "title": "ping[2:17] 17:28:46.970 (1037 ms) PNG-EP-02 Sai HTTP method POST /ping",
+      "content": "ui_smoke[1:6]",
+      "start": 1778415003744,
+      "end": 1778415004523,
+      "title": "ui_smoke[1:6] 19:10:03.744 (780 ms) React login screen renders",
       "className": "passed"
     }
   ]

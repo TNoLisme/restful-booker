@@ -7,11 +7,19 @@ const adminCredentials = {
 
 async function parseResponse(response) {
   const text = await response.text()
-  const data = text ? JSON.parse(text) : null
+  let data = null
+
+  if (text) {
+    try {
+      data = JSON.parse(text)
+    } catch {
+      data = { message: text }
+    }
+  }
 
   if (!response.ok) {
     const message = data?.reason || data?.message || `Request failed with ${response.status}`
-    throw new Error(message)
+    throw new Error(`${message} (${response.status})`)
   }
 
   return data
@@ -29,7 +37,12 @@ export async function login(credentials) {
     body: JSON.stringify(credentials),
   })
 
-  return parseResponse(response)
+  const data = await parseResponse(response)
+  if (!data?.token) {
+    throw new Error(data?.reason || 'Authentication failed')
+  }
+
+  return data
 }
 
 export async function pingServer() {

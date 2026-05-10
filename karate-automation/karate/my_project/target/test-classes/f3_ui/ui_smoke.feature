@@ -1,9 +1,12 @@
-Feature: Kiểm thử Giao diện (UI Smoke Test)
+Feature: UI smoke
 
   Background:
     * configure driver = { type: 'chrome' }
 
-  Scenario: Truy cập trang chủ Restful-Booker
-    Given driver baseUrl
-    * delay(1000)
-    * print 'UI Smoke Test executed successfully'
+  Scenario: React login screen renders
+    Given driver webUrl
+    And waitFor('[data-testid=login-shell]')
+    Then waitForText('body', 'Restful Booker Admin')
+    And waitFor('[data-testid=login-username]')
+    And waitFor('[data-testid=login-password]')
+    And waitFor('[data-testid=login-submit]')

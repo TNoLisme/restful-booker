@@ -218,576 +218,305 @@
     <script src="res/bootstrap.bundle.min.js"></script>
     <script src="res/karate-report.js"></script>
     <script id="karate-data" type="application/json">{
-  "env": null,
-  "reportDate": "2026-05-10 17:26:37",
-  "karateVersion": "2.0.3.RC1",
+  "env": "ui",
+  "reportDate": "2026-05-10 19:09:28",
+  "karateVersion": "2.0.8",
   "summary": {
-    "feature_count": 15,
-    "feature_passed": 11,
-    "feature_failed": 4,
-    "scenario_count": 52,
-    "scenario_passed": 39,
-    "scenario_failed": 13,
-    "duration_millis": 130079,
+    "feature_count": 8,
+    "feature_passed": 7,
+    "feature_failed": 1,
+    "scenario_count": 22,
+    "scenario_passed": 20,
+    "scenario_failed": 2,
+    "scenario_skipped": 0,
+    "duration_millis": 36096,
     "status": "failed"
   },
   "features": [
     {
-      "name": "Create Token API - boundary",
-      "relativePath": "target/test-classes/f1_api/auth/create_token_boundary.feature",
-      "fileName": "target.test-classes.f1_api.auth.create_token_boundary",
+      "name": "Auth UI",
+      "relativePath": "target/test-classes/f3_ui/ui_auth.feature",
+      "fileName": "target.test-classes.f3_ui.ui_auth",
       "passed": true,
       "failed": false,
-      "durationMillis": 4591,
-      "scenarioCount": 4,
-      "passedCount": 4,
-      "failedCount": 0,
-      "scenarios": [
-        {
-          "name": "TOKEN1",
-          "refId": "[1.1:9]",
-          "passed": true,
-          "durationMillis": 1448,
-          "tags": null
-        },
-        {
-          "name": "TOKEN2",
-          "refId": "[1.2:9]",
-          "passed": true,
-          "durationMillis": 1089,
-          "tags": null
-        },
-        {
-          "name": "TOKEN3",
-          "refId": "[1.3:9]",
-          "passed": true,
-          "durationMillis": 1025,
-          "tags": null
-        },
-        {
-          "name": "TOKEN4",
-          "refId": "[1.4:9]",
-          "passed": true,
-          "durationMillis": 968,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "SQL Injection attempt",
-      "relativePath": "target/test-classes/f1_api/auth/security1.feature",
-      "fileName": "target.test-classes.f1_api.auth.security1",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 1076,
-      "scenarioCount": 1,
-      "passedCount": 1,
-      "failedCount": 0,
-      "scenarios": [
-        {
-          "name": "SQL Injection attempt",
-          "refId": "[1:2]",
-          "passed": true,
-          "durationMillis": 1076,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "noSQL Injection attempt",
-      "relativePath": "target/test-classes/f1_api/auth/security2.feature",
-      "fileName": "target.test-classes.f1_api.auth.security2",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 1063,
-      "scenarioCount": 1,
-      "passedCount": 1,
-      "failedCount": 0,
-      "scenarios": [
-        {
-          "name": "NoSQL Injection attempt",
-          "refId": "[1:3]",
-          "passed": true,
-          "durationMillis": 1063,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "noSQL Injection attempt",
-      "relativePath": "target/test-classes/f1_api/auth/security3.feature",
-      "fileName": "target.test-classes.f1_api.auth.security3",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 1005,
-      "scenarioCount": 1,
-      "passedCount": 1,
-      "failedCount": 0,
-      "scenarios": [
-        {
-          "name": "NoSQL Injection attempt",
-          "refId": "[1:3]",
-          "passed": true,
-          "durationMillis": 1005,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "User enumeration",
-      "relativePath": "target/test-classes/f1_api/auth/security4.feature",
-      "fileName": "target.test-classes.f1_api.auth.security4",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 2016,
+      "durationMillis": 4471,
       "scenarioCount": 2,
       "passedCount": 2,
       "failedCount": 0,
-      "scenarios": [
-        {
-          "name": "User enumeration check",
-          "refId": "[1:3]",
-          "passed": true,
-          "durationMillis": 1003,
-          "tags": null
-        },
-        {
-          "name": "Non-existing user",
-          "refId": "[2:9]",
-          "passed": true,
-          "durationMillis": 1009,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "Timing attack check",
-      "relativePath": "target/test-classes/f1_api/auth/security5.feature",
-      "fileName": "target.test-classes.f1_api.auth.security5",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 1243,
-      "scenarioCount": 1,
-      "passedCount": 1,
-      "failedCount": 0,
-      "scenarios": [
-        {
-          "name": "Timing attack check",
-          "refId": "[1:3]",
-          "passed": true,
-          "durationMillis": 1227,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "Token should be random",
-      "relativePath": "target/test-classes/f1_api/auth/security6.feature",
-      "fileName": "target.test-classes.f1_api.auth.security6",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 1235,
-      "scenarioCount": 1,
-      "passedCount": 1,
-      "failedCount": 0,
-      "scenarios": [
-        {
-          "name": "Token should be random",
-          "refId": "[1:3]",
-          "passed": true,
-          "durationMillis": 1234,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "Brute Force Security Test",
-      "relativePath": "target/test-classes/f1_api/auth/security7.feature",
-      "fileName": "target.test-classes.f1_api.auth.security7",
-      "passed": false,
-      "failed": true,
-      "durationMillis": 93594,
-      "scenarioCount": 1,
-      "passedCount": 0,
-      "failedCount": 1,
       "skippedCount": 0,
       "scenarios": [
         {
-          "name": "Try attack by user and password",
-          "refId": "[1:3]",
-          "passed": false,
-          "durationMillis": 93591,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "Booking",
-      "relativePath": "target/test-classes/f1_api/booking/bookingGet1.feature",
-      "fileName": "target.test-classes.f1_api.booking.bookingget1",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 41,
-      "scenarioCount": 6,
-      "passedCount": 6,
-      "failedCount": 0,
-      "scenarios": [
-        {
-          "name": "GBK-EP-01 - Get booking detail by id",
-          "refId": "[1:7]",
-          "passed": true,
-          "durationMillis": 10,
-          "tags": null
-        },
-        {
-          "name": "GBK-EP2-02 - Miền dữ liệu không hợp lệ",
-          "refId": "[2:28]",
-          "passed": true,
-          "durationMillis": 3,
-          "tags": null
-        },
-        {
-          "name": "GBK-BVA-01- Min+",
-          "refId": "[3:33]",
-          "passed": true,
-          "durationMillis": 5,
-          "tags": null
-        },
-        {
-          "name": "GBK-BVA-02- nom",
-          "refId": "[4:53]",
-          "passed": true,
-          "durationMillis": 6,
-          "tags": null
-        },
-        {
-          "name": "GBK-BVA-03- Max-",
-          "refId": "[5:73]",
-          "passed": true,
-          "durationMillis": 6,
-          "tags": null
-        },
-        {
-          "name": "GBK-BVA-04- Max",
-          "refId": "[6:93]",
-          "passed": true,
-          "durationMillis": 5,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "BookingIds",
-      "relativePath": "target/test-classes/f1_api/booking/bookingGet2.feature",
-      "fileName": "target.test-classes.f1_api.booking.bookingget2",
-      "passed": false,
-      "failed": true,
-      "durationMillis": 80,
-      "scenarioCount": 10,
-      "passedCount": 8,
-      "failedCount": 2,
-      "scenarios": [
-        {
-          "name": "GBK-EP-01  get booking ids and validate response",
+          "name": "Login success and logout",
           "refId": "[1:6]",
           "passed": true,
-          "durationMillis": 7,
+          "skipped": false,
+          "durationMillis": 3024,
           "tags": null
         },
         {
-          "name": "GBK-EP-02 - Filter theo firstname tồn tại",
-          "refId": "[2:15]",
-          "passed": false,
-          "durationMillis": 9,
-          "tags": null
-        },
-        {
-          "name": "GBK-EP-03 - Filter theo lastname tồn tại",
-          "refId": "[3:23]",
+          "name": "Invalid login stays on login screen and reports error",
+          "refId": "[2:21]",
           "passed": true,
-          "durationMillis": 6,
-          "tags": null
-        },
-        {
-          "name": "GBK-EP-04 - Filter kết hợp firstname + lastname",
-          "refId": "[4:31]",
-          "passed": true,
-          "durationMillis": 6,
-          "tags": null
-        },
-        {
-          "name": "GBK-EP-05 - Filter không khớp bất kỳ record nào",
-          "refId": "[5:41]",
-          "passed": true,
-          "durationMillis": 3,
-          "tags": null
-        },
-        {
-          "name": "GBK-BVA-01 - firstname = chuỗi 1 ký tự",
-          "refId": "[6:50]",
-          "passed": true,
-          "durationMillis": 6,
-          "tags": null
-        },
-        {
-          "name": "GBK-BVA-02 - firstname = chuỗi rỗng",
-          "refId": "[7:57]",
-          "passed": true,
-          "durationMillis": 5,
-          "tags": null
-        },
-        {
-          "name": "GBK-BVA-03 - checkin ngày hợp lệ đúng format",
-          "refId": "[8:64]",
-          "passed": true,
-          "durationMillis": 4,
-          "tags": null
-        },
-        {
-          "name": "GBK-BVA-04 - checkin sai định dạng",
-          "refId": "[9:71]",
-          "passed": false,
-          "durationMillis": 12,
-          "tags": null
-        },
-        {
-          "name": "GBK-BVA-05 - checkout nhỏ hơn checkin",
-          "refId": "[10:77]",
-          "passed": true,
-          "durationMillis": 6,
+          "skipped": false,
+          "durationMillis": 1355,
           "tags": null
         }
       ]
     },
     {
-      "name": "Create Booking API",
-      "relativePath": "target/test-classes/f1_api/booking/createBooking.feature",
-      "fileName": "target.test-classes.f1_api.booking.createbooking",
+      "name": "Booking read UI",
+      "relativePath": "target/test-classes/f3_ui/ui_booking_read.feature",
+      "fileName": "target.test-classes.f3_ui.ui_booking_read",
       "passed": true,
       "failed": false,
-      "durationMillis": 37,
-      "scenarioCount": 5,
-      "passedCount": 5,
-      "failedCount": 0,
-      "scenarios": [
-        {
-          "name": "CBK-EP-01 - Đầy đủ field hợp lệ",
-          "refId": "[1:8]",
-          "passed": true,
-          "durationMillis": 6,
-          "tags": null
-        },
-        {
-          "name": "CBK-EP-02 - Thiếu firstname",
-          "refId": "[2:47]",
-          "passed": true,
-          "durationMillis": 7,
-          "tags": null
-        },
-        {
-          "name": "CBK-EP-03 - Thiếu bookingdates",
-          "refId": "[3:65]",
-          "passed": true,
-          "durationMillis": 6,
-          "tags": null
-        },
-        {
-          "name": "CBK-EP-04 - depositpaid = false",
-          "refId": "[4:80]",
-          "passed": true,
-          "durationMillis": 5,
-          "tags": null
-        },
-        {
-          "name": "CBK-EP-05 - totalprice sai kiểu dữ liệu",
-          "refId": "[5:101]",
-          "passed": true,
-          "durationMillis": 5,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "Delete Booking API",
-      "relativePath": "target/test-classes/f1_api/booking/deleteBooking.feature",
-      "fileName": "target.test-classes.f1_api.booking.deletebooking",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 6452,
-      "scenarioCount": 5,
-      "passedCount": 5,
-      "failedCount": 0,
-      "scenarios": [
-        {
-          "name": "DEL-EP-01 xoá thành công với token hợp lệ",
-          "refId": "[1:22]",
-          "passed": true,
-          "durationMillis": 1274,
-          "tags": null
-        },
-        {
-          "name": "DEL-EP-02 xoá không hợp lệ: không có token",
-          "refId": "[2:30]",
-          "passed": true,
-          "durationMillis": 1248,
-          "tags": null
-        },
-        {
-          "name": "DEL-EP-03 xoá không hợp lệ: token sai",
-          "refId": "[3:37]",
-          "passed": true,
-          "durationMillis": 1275,
-          "tags": null
-        },
-        {
-          "name": "DEL-EP-04 xoá booking đã bị xoá",
-          "refId": "[4:45]",
-          "passed": true,
-          "durationMillis": 1432,
-          "tags": null
-        },
-        {
-          "name": "DEL-EP-05 xoá booking không tồn tại",
-          "refId": "[5:60]",
-          "passed": true,
-          "durationMillis": 1218,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "Update firstname of booking",
-      "relativePath": "target/test-classes/f1_api/booking/updateBooking.feature",
-      "fileName": "target.test-classes.f1_api.booking.updatebooking",
-      "passed": false,
-      "failed": true,
-      "durationMillis": 6501,
-      "scenarioCount": 5,
-      "passedCount": 0,
-      "failedCount": 5,
-      "scenarios": [
-        {
-          "name": "UPD-EP-01 cập nhật hợp lệ",
-          "refId": "[1:20]",
-          "passed": false,
-          "durationMillis": 1363,
-          "tags": null
-        },
-        {
-          "name": "UPD-EP-02 cập nhật không hợp lệ: không có token",
-          "refId": "[2:38]",
-          "passed": false,
-          "durationMillis": 1284,
-          "tags": null
-        },
-        {
-          "name": "UPD-EP-03 cập nhật không hợp lệ: Token sai",
-          "refId": "[3:52]",
-          "passed": false,
-          "durationMillis": 1319,
-          "tags": null
-        },
-        {
-          "name": "UPD-EP-04 cập nhật không hợp lệ: Booking không tồn tại",
-          "refId": "[4:66]",
-          "passed": false,
-          "durationMillis": 1292,
-          "tags": null
-        },
-        {
-          "name": "UPD-EP-05 cập nhật không hợp lệ: Body thiếu",
-          "refId": "[5:80]",
-          "passed": false,
-          "durationMillis": 1239,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "Partial Update Booking API",
-      "relativePath": "target/test-classes/f1_api/booking/updateBooking2.feature",
-      "fileName": "target.test-classes.f1_api.booking.updatebooking2",
-      "passed": false,
-      "failed": true,
-      "durationMillis": 9051,
-      "scenarioCount": 7,
-      "passedCount": 2,
-      "failedCount": 5,
-      "scenarios": [
-        {
-          "name": "PAT-EP-01 cập nhật 1 field",
-          "refId": "[1:20]",
-          "passed": false,
-          "durationMillis": 1233,
-          "tags": null
-        },
-        {
-          "name": "PAT-EP-02 cập nhật nhiều field cùng lúc",
-          "refId": "[2:46]",
-          "passed": false,
-          "durationMillis": 1272,
-          "tags": null
-        },
-        {
-          "name": "PAT-EP-03 cập nhật không hợp lệ: không có token",
-          "refId": "[3:74]",
-          "passed": true,
-          "durationMillis": 1279,
-          "tags": null
-        },
-        {
-          "name": "PAT-EP-04 field không tồn tại trong schema",
-          "refId": "[4:88]",
-          "passed": false,
-          "durationMillis": 1254,
-          "tags": null
-        },
-        {
-          "name": "PAT-BVA-01 body rỗng {}",
-          "refId": "[5:107]",
-          "passed": false,
-          "durationMillis": 1239,
-          "tags": null
-        },
-        {
-          "name": "PAT-BVA-02 firstname là chuỗi rỗng",
-          "refId": "[6:120]",
-          "passed": true,
-          "durationMillis": 1389,
-          "tags": null
-        },
-        {
-          "name": "PAT-BVA-03 totalprice = 0",
-          "refId": "[7:138]",
-          "passed": false,
-          "durationMillis": 1381,
-          "tags": null
-        }
-      ]
-    },
-    {
-      "name": "Ping API",
-      "relativePath": "target/test-classes/f1_api/ping/ping.feature",
-      "fileName": "target.test-classes.f1_api.ping.ping",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 2048,
+      "durationMillis": 6618,
       "scenarioCount": 2,
       "passedCount": 2,
       "failedCount": 0,
+      "skippedCount": 0,
       "scenarios": [
         {
-          "name": "PNG-EP-01 Health check cơ bản",
-          "refId": "[1:8]",
+          "name": "List bookings with empty, firstname, lastname and date filters",
+          "refId": "[1:24]",
           "passed": true,
-          "durationMillis": 1010,
+          "skipped": false,
+          "durationMillis": 3446,
           "tags": null
         },
         {
-          "name": "PNG-EP-02 Sai HTTP method POST /ping",
-          "refId": "[2:17]",
+          "name": "Get booking detail by id and report not found id",
+          "refId": "[2:55]",
           "passed": true,
-          "durationMillis": 1037,
+          "skipped": false,
+          "durationMillis": 3166,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Booking write UI",
+      "relativePath": "target/test-classes/f3_ui/ui_booking_write.feature",
+      "fileName": "target.test-classes.f3_ui.ui_booking_write",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 6022,
+      "scenarioCount": 1,
+      "passedCount": 1,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "Create, update, patch and delete a booking from the UI",
+          "refId": "[1:6]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 6020,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "UI defect discovery",
+      "relativePath": "target/test-classes/f3_ui/ui_defect_discovery.feature",
+      "fileName": "target.test-classes.f3_ui.ui_defect_discovery",
+      "passed": false,
+      "failed": true,
+      "durationMillis": 6838,
+      "scenarioCount": 5,
+      "passedCount": 3,
+      "failedCount": 2,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "Invalid login must not open the dashboard",
+          "refId": "[1:6]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 956,
+          "tags": null
+        },
+        {
+          "name": "Create form with missing required firstname is invalid",
+          "refId": "[2:15]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 1269,
+          "tags": null
+        },
+        {
+          "name": "Update and delete unknown booking ids report errors",
+          "refId": "[3:26]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 3358,
+          "tags": null
+        },
+        {
+          "name": "Expected defect - sidebar labels should match their API pages",
+          "refId": "[4:48]",
+          "passed": false,
+          "skipped": false,
+          "durationMillis": 771,
+          "tags": null
+        },
+        {
+          "name": "Expected defect - landing target blank links should protect opener",
+          "refId": "[5:56]",
+          "passed": false,
+          "skipped": false,
+          "durationMillis": 473,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Landing page on port 3001",
+      "relativePath": "target/test-classes/f3_ui/ui_landing_3001.feature",
+      "fileName": "target.test-classes.f3_ui.ui_landing_3001",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 7433,
+      "scenarioCount": 8,
+      "passedCount": 8,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "Landing page content, buttons, links and assets render",
+          "refId": "[1:6]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 277,
+          "tags": null
+        },
+        {
+          "name": "Internal API Docs links open and browser can return to landing page",
+          "refId": "[2:29]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 1367,
+          "tags": null
+        },
+        {
+          "name": "Header external links are clickable and can return to landing page",
+          "refId": "[3:44]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 4294,
+          "tags": null
+        },
+        {
+          "name": "Ministry text support link fires click with the expected external URL",
+          "refId": "[4:75]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 194,
+          "tags": null
+        },
+        {
+          "name": "AI book image link fires click with the expected external URL",
+          "refId": "[5:86]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 213,
+          "tags": null
+        },
+        {
+          "name": "Testing Web APIs book image link fires click with the expected external URL",
+          "refId": "[6:97]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 197,
+          "tags": null
+        },
+        {
+          "name": "Ministry Pro image link fires click with the expected external URL",
+          "refId": "[7:108]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 186,
+          "tags": null
+        },
+        {
+          "name": "Sign In opens the React UI login screen",
+          "refId": "[8:119]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 700,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Dashboard navigation",
+      "relativePath": "target/test-classes/f3_ui/ui_navigation.feature",
+      "fileName": "target.test-classes.f3_ui.ui_navigation",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 3021,
+      "scenarioCount": 2,
+      "passedCount": 2,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "Sidebar pages render the expected screen",
+          "refId": "[1:6]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 1370,
+          "tags": null
+        },
+        {
+          "name": "Dashboard action cards navigate to API pages",
+          "refId": "[2:41]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 1644,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Ping UI",
+      "relativePath": "target/test-classes/f3_ui/ui_ping.feature",
+      "fileName": "target.test-classes.f3_ui.ui_ping",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 835,
+      "scenarioCount": 1,
+      "passedCount": 1,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "Ping page shows API health result",
+          "refId": "[1:6]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 835,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "UI smoke",
+      "relativePath": "target/test-classes/f3_ui/ui_smoke.feature",
+      "fileName": "target.test-classes.f3_ui.ui_smoke",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 782,
+      "scenarioCount": 1,
+      "passedCount": 1,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "React login screen renders",
+          "refId": "[1:6]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 780,
           "tags": null
         }
       ]
