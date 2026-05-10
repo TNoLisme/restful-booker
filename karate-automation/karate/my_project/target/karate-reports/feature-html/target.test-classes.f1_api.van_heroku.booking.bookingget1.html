@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="../res/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../res/karate-report.css"/>
+    <link rel="icon" href="../res/favicon.ico"/>
+    <script src="../res/alpine.min.js" defer></script>
+    <title>Feature Report</title>
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            width: 220px;
+            overflow-y: auto;
+            border-right: 1px solid var(--bs-border-color);
+        }
+        .main-content {
+            margin-left: 220px;
+            padding: 1rem;
+        }
+        .step-row {
+            border-bottom: 1px solid var(--bs-border-color);
+            padding: 0.25rem 0;
+            font-family: var(--bs-font-monospace);
+            font-size: 0.875rem;
+        }
+        .step-row:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+        .step-row.clickable {
+            cursor: pointer;
+        }
+        .step-logs {
+            background-color: var(--bs-dark-bg-subtle);
+            border-radius: 0.25rem;
+            margin: 0.25rem 0 0.25rem 50px;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .nav-scenario {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-left: 3px solid transparent;
+        }
+        .nav-scenario:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+        .nav-scenario.active {
+            border-left-color: var(--bs-primary);
+            background-color: var(--bs-tertiary-bg);
+        }
+        .log-indicator {
+            font-size: 0.6rem;
+            vertical-align: middle;
+        }
+        .nested-call {
+            border-left: 3px solid var(--bs-info);
+            margin: 0.5rem 0 0.5rem 50px;
+            padding-left: 0.5rem;
+            background-color: var(--bs-tertiary-bg);
+        }
+        .nested-scenario {
+            border-radius: 0.25rem;
+            margin: 0.25rem 0;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .nested-scenario .nested-step {
+            font-family: var(--bs-font-monospace);
+            font-size: 0.8rem;
+            padding: 0.125rem 0;
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body x-data="KarateReport.featureData()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../karate-summary.html">
+                <img src="../res/karate-logo.svg" alt="Karate" height="32" class="d-inline-block align-middle me-2"/>
+                Karate
+            </a>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../karate-summary.html">Summary</a>
+                </li>
+            </ul>
+            <button class="btn btn-sm btn-outline-light ms-2" @click="toggleTheme()" title="Toggle theme">
+                <span x-show="theme === 'light'">&#9790;</span>
+                <span x-show="theme === 'dark'">&#9788;</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Left Sidebar -->
+    <nav class="sidebar bg-body-tertiary pt-3">
+        <div class="px-3 mb-2">
+            <small class="text-muted">Scenarios</small>
+        </div>
+        <template x-for="scenario in data.scenarios" :key="scenario.refId">
+            <a class="nav-scenario d-block text-decoration-none"
+               :class="scenario.passed ? 'text-success' : 'text-danger'"
+               :href="'#' + scenario.refId"
+               :title="scenario.name">
+                <span class="fw-bold" x-text="scenario.refId"></span>
+                <span x-text="scenario.name ? ' ' + truncate(scenario.name, 20) : ''"></span>
+            </a>
+        </template>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" style="margin-top: 56px;">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="../karate-summary.html">Summary</a></li>
+                <li class="breadcrumb-item active" aria-current="page" x-text="data.name || data.path">Feature</li>
+            </ol>
+        </nav>
+
+        <h4 x-text="data.name || 'Feature'">Feature Name</h4>
+        <p class="text-muted small" x-text="data.path">path/to/feature</p>
+
+        <!-- Scenarios -->
+        <template x-for="scenario in data.scenarios" :key="scenario.refId">
+            <div class="card mb-3" :id="scenario.refId">
+                <div class="card-header d-flex justify-content-between align-items-center py-2"
+                     :class="scenario.passed ? 'bg-success-subtle' : 'bg-danger-subtle'">
+                    <span>
+                        <span class="fw-bold" x-text="scenario.refId"></span>
+                        <span x-text="scenario.name"></span>
+                        <template x-if="scenario.isOutlineExample">
+                            <span class="badge bg-info ms-1">Outline</span>
+                        </template>
+                        <template x-for="tag in scenario.tags || []" :key="tag">
+                            <span class="badge bg-secondary ms-1" x-text="tag"></span>
+                        </template>
+                    </span>
+                    <span>
+                        <small class="text-muted me-2" x-text="scenario.durationMillis + ' ms'"></small>
+                        <span x-show="scenario.passed" class="badge bg-success">PASS</span>
+                        <span x-show="!scenario.passed" class="badge bg-danger">FAIL</span>
+                    </span>
+                </div>
+                <div class="card-body p-0" x-html="renderSteps(scenario.steps)">
+                </div>
+                <!-- Scenario Error -->
+                <template x-if="scenario.error && !scenario.steps?.some(s => s.error)">
+                    <div class="card-footer bg-danger-subtle">
+                        <pre class="mb-0 small text-danger" x-text="scenario.error"></pre>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </main>
+
+    <script src="../res/bootstrap.bundle.min.js"></script>
+    <script src="../res/karate-report.js"></script>
+    <script id="karate-data" type="application/json">{
+  "path": "target/test-classes/f1_api/van_heroku/booking/bookingGet1.feature",
+  "name": "Booking",
+  "relativePath": "target/test-classes/f1_api/van_heroku/booking/bookingGet1.feature",
+  "passed": true,
+  "durationMillis": 48,
+  "scenarios": [
+    {
+      "name": "GBK-EP-01 - Get booking detail by id",
+      "line": 7,
+      "passed": true,
+      "durationMillis": 0,
+      "startTime": 1778389172864,
+      "endTime": 1778389172864,
+      "refId": "[1:7]",
+      "sectionIndex": 1,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "ForkJoinPool.commonPool-worker-1",
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = 'http://127.0.0.1:3001/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 1,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase + '/1'",
+          "line": 8,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 9,
+          "status": "passed",
+          "durationMillis": 7,
+          "hasLogs": true,
+          "logs": "request:\n1 > GET http://127.0.0.1:3001/booking/1\n1 > Accept: */*\n1 > Host: 127.0.0.1:3001\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6 (Java/22.0.2)\n\nresponse time in milliseconds: 0\n1 < 200 GET /booking/1\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"aa-D8BSyrE5HmjqeBAlthNRAjcVXP0\"\n1 < Connection: keep-alive\n1 < Content-Length: 170\n1 < Date: Sun, 10 May 2026 04:59:32 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\"firstname\":\"Sally\",\"lastname\":\"Brown\",\"totalprice\":278,\"depositpaid\":true,\"bookingdates\":{\"checkin\":\"2023-04-11\",\"checkout\":\"2024-10-05\"},\"additionalneeds\":\"Breakfast\"}\n\nGET http://127.0.0.1:3001/booking/1\n200 (0 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 10,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response ==",
+          "line": 13,
+          "comments": [
+            "# verify response structure"
+          ],
+          "status": "passed",
+          "durationMillis": 1,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "GBK-EP2-02 - Miền dữ liệu không hợp lệ",
+      "line": 28,
+      "passed": true,
+      "durationMillis": 16,
+      "startTime": 1778389172864,
+      "endTime": 1778389172880,
+      "refId": "[2:28]",
+      "sectionIndex": 2,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "ForkJoinPool.commonPool-worker-1",
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = 'http://127.0.0.1:3001/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase + '/a'",
+          "line": 29,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 30,
+          "status": "passed",
+          "durationMillis": 6,
+          "hasLogs": true,
+          "logs": "request:\n1 > GET http://127.0.0.1:3001/booking/a\n1 > Accept: */*\n1 > Host: 127.0.0.1:3001\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6 (Java/22.0.2)\n\nresponse time in milliseconds: 16\n1 < 404 GET /booking/a\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"9-0gXL1ngzMqISxa6S1zx3F4wtLyg\"\n1 < Connection: keep-alive\n1 < Content-Length: 9\n1 < Date: Sun, 10 May 2026 04:59:32 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: text/plain; charset=utf-8\nNot Found\n\nGET http://127.0.0.1:3001/booking/a\n404 (16 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "404",
+          "line": 31,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "GBK-BVA-01- Min+",
+      "line": 33,
+      "passed": true,
+      "durationMillis": 0,
+      "startTime": 1778389172880,
+      "endTime": 1778389172880,
+      "refId": "[3:33]",
+      "sectionIndex": 3,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "ForkJoinPool.commonPool-worker-1",
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = 'http://127.0.0.1:3001/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase + '/2'",
+          "line": 34,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 35,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > GET http://127.0.0.1:3001/booking/2\n1 > Accept: */*\n1 > Host: 127.0.0.1:3001\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6 (Java/22.0.2)\n\nresponse time in milliseconds: 0\n1 < 200 GET /booking/2\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"ab-8suaXM1TkI1E/ys9KCq9wo79YjU\"\n1 < Connection: keep-alive\n1 < Content-Length: 171\n1 < Date: Sun, 10 May 2026 04:59:32 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\"firstname\":\"Susan\",\"lastname\":\"Jones\",\"totalprice\":151,\"depositpaid\":false,\"bookingdates\":{\"checkin\":\"2015-03-01\",\"checkout\":\"2016-01-07\"},\"additionalneeds\":\"Breakfast\"}\n\nGET http://127.0.0.1:3001/booking/2\n200 (0 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 36,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response ==",
+          "line": 38,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "GBK-BVA-02- nom",
+      "line": 53,
+      "passed": true,
+      "durationMillis": 15,
+      "startTime": 1778389172880,
+      "endTime": 1778389172895,
+      "refId": "[4:53]",
+      "sectionIndex": 4,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "ForkJoinPool.commonPool-worker-1",
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = 'http://127.0.0.1:3001/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase + '/5'",
+          "line": 54,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 55,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > GET http://127.0.0.1:3001/booking/5\n1 > Accept: */*\n1 > Host: 127.0.0.1:3001\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6 (Java/22.0.2)\n\nresponse time in milliseconds: 15\n1 < 200 GET /booking/5\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"a8-W8R926fQ2ZKva6amLrRX2NHPjVc\"\n1 < Connection: keep-alive\n1 < Content-Length: 168\n1 < Date: Sun, 10 May 2026 04:59:32 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\"firstname\":\"Jim\",\"lastname\":\"Smith\",\"totalprice\":356,\"depositpaid\":true,\"bookingdates\":{\"checkin\":\"2015-11-08\",\"checkout\":\"2023-10-25\"},\"additionalneeds\":\"Breakfast\"}\n\nGET http://127.0.0.1:3001/booking/5\n200 (15 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 56,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response ==",
+          "line": 58,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "GBK-BVA-03- Max-",
+      "line": 73,
+      "passed": true,
+      "durationMillis": 0,
+      "startTime": 1778389172895,
+      "endTime": 1778389172895,
+      "refId": "[5:73]",
+      "sectionIndex": 5,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "ForkJoinPool.commonPool-worker-1",
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = 'http://127.0.0.1:3001/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase + '/9'",
+          "line": 74,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 75,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > GET http://127.0.0.1:3001/booking/9\n1 > Accept: */*\n1 > Host: 127.0.0.1:3001\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6 (Java/22.0.2)\n\nresponse time in milliseconds: 0\n1 < 200 GET /booking/9\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"ac-61SUR2aSsI5Uae0W/7mBUsAUGW0\"\n1 < Connection: keep-alive\n1 < Content-Length: 172\n1 < Date: Sun, 10 May 2026 04:59:32 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\"firstname\":\"Mark\",\"lastname\":\"Jackson\",\"totalprice\":577,\"depositpaid\":false,\"bookingdates\":{\"checkin\":\"2020-09-29\",\"checkout\":\"2023-03-17\"},\"additionalneeds\":\"Breakfast\"}\n\nGET http://127.0.0.1:3001/booking/9\n200 (0 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 76,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response ==",
+          "line": 78,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "GBK-BVA-04- Max",
+      "line": 93,
+      "passed": true,
+      "durationMillis": 16,
+      "startTime": 1778389172895,
+      "endTime": 1778389172911,
+      "refId": "[6:93]",
+      "sectionIndex": 6,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "ForkJoinPool.commonPool-worker-1",
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = 'http://127.0.0.1:3001/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase + '/10'",
+          "line": 94,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 95,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > GET http://127.0.0.1:3001/booking/10\n1 > Accept: */*\n1 > Host: 127.0.0.1:3001\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6 (Java/22.0.2)\n\nresponse time in milliseconds: 16\n1 < 200 GET /booking/10\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"ad-TUIjt833NB94QQNnCBKw20xi5Ls\"\n1 < Connection: keep-alive\n1 < Content-Length: 173\n1 < Date: Sun, 10 May 2026 04:59:32 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\"firstname\":\"Susan\",\"lastname\":\"Ericsson\",\"totalprice\":294,\"depositpaid\":true,\"bookingdates\":{\"checkin\":\"2019-02-15\",\"checkout\":\"2019-05-07\"},\"additionalneeds\":\"Breakfast\"}\n\nGET http://127.0.0.1:3001/booking/10\n200 (16 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 96,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response ==",
+          "line": 98,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    }
+  ]
+}</script>
+</body>
+</html>
