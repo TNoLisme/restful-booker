@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>22</java.version>
-        <karate.version>2.0.3.RC1</karate.version>
+        <karate.version>2.0.8</karate.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
