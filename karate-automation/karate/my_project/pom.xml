@@ -18,7 +18,6 @@
     </properties>
 
     <dependencies>
-        <!-- Karate (junit6) -->
         <dependency>
             <groupId>io.karatelabs</groupId>
             <artifactId>karate-junit6</artifactId>
@@ -26,7 +25,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- 🔥 QUAN TRỌNG: JUnit Platform -->
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
@@ -34,7 +32,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- (khuyến nghị) -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>

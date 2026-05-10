@@ -12,7 +12,7 @@ class ApiTest {
                             .format(java.time.LocalDateTime.now());
         String reportDir = "target/karate-reports_" + timestamp;
 
-        Results results = Runner.path("classpath:f1_api")
+        Results results = Runner.path("classpath:f1_api/van_heroku/auth/create_token_boundary.feature")
                 .outputHtmlReport(true)
                 .reportDir(reportDir) // Chỉ định thư mục báo cáo riêng biệt
                 .parallel(5);

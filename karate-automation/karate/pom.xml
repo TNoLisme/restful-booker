@@ -100,10 +100,20 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.5</version>
                 <configuration>
-                    <!-- Exclude testcontainers E2E tests by default (require Docker) -->
                     <excludes>
                         <exclude>**/e2e/**</exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+
+                <configuration>
+                    <argLine>
+                        -Djdk.net.URLClassPath.disableClassPathURLCheck=true
+                    </argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -131,8 +141,6 @@
     </build>
 
     <profiles>
-        <!-- OWASP dependency-check: activate with -Pdepcheck -->
-        <!-- Pass NVD API key via -DnvdApiKey=... for faster scans -->
         <profile>
             <id>depcheck</id>
             <build>
