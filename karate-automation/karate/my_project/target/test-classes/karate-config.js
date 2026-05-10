@@ -1,5 +1,5 @@
 function fn() {
-  var env = karate.env;
+  var env = karate.env || karate.properties['karate.env'];
   karate.log('karate.env:', env);
 
   if (!env) {
@@ -26,6 +26,14 @@ function fn() {
   karate.configure('readTimeout', 5000);
 
   if (env === 'ui') {
+    config.authToken = null;
+    return config;
+  }
+
+  if (env === 'perf') {
+    config.baseUrl = karate.properties['api.baseUrl'] || config.baseUrl;
+    karate.configure('logging', { report: 'warn', console: 'warn' });
+    karate.configure('matchEachEmptyAllowed', true);
     config.authToken = null;
     return config;
   }

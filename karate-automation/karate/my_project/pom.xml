@@ -12,6 +12,7 @@
     <properties>
         <java.version>22</java.version>
         <karate.version>2.0.8</karate.version>
+        <gatling.plugin.version>4.21.0</gatling.plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,6 +22,13 @@
         <dependency>
             <groupId>io.karatelabs</groupId>
             <artifactId>karate-junit6</artifactId>
+            <version>${karate.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.karatelabs</groupId>
+            <artifactId>karate-gatling</artifactId>
             <version>${karate.version}</version>
             <scope>test</scope>
         </dependency>
@@ -65,5 +73,23 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>gatling</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.gatling</groupId>
+                        <artifactId>gatling-maven-plugin</artifactId>
+                        <version>${gatling.plugin.version}</version>
+                        <configuration>
+                            <simulationClass>perf.RestfulBookerSimulation</simulationClass>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
