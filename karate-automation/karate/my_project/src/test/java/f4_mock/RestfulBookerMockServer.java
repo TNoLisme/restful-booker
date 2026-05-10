@@ -13,7 +13,7 @@ public final class RestfulBookerMockServer {
                 .feature("classpath:f4_mock/restful_booker_mock.feature")
                 .http(port)
                 .build();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> server.stop().join()));
+        Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
         System.out.println("Restful Booker mock server running at http://localhost:" + server.getPort());
         server.waitSync();
     }

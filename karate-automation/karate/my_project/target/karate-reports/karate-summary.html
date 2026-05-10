@@ -195,26 +195,26 @@
     <script src="res/karate-report.js"></script>
     <script id="karate-data" type="application/json">{
   "env": null,
-  "reportDate": "2026-05-10 11:57:55",
+  "reportDate": "2026-05-10 17:26:37",
   "karateVersion": "2.0.3.RC1",
   "summary": {
     "feature_count": 15,
-    "feature_passed": 12,
-    "feature_failed": 3,
+    "feature_passed": 11,
+    "feature_failed": 4,
     "scenario_count": 52,
-    "scenario_passed": 48,
-    "scenario_failed": 4,
-    "duration_millis": 122600,
+    "scenario_passed": 39,
+    "scenario_failed": 13,
+    "duration_millis": 130079,
     "status": "failed"
   },
   "features": [
     {
       "name": "Create Token API - boundary",
-      "relativePath": "target/test-classes/f1_api/van_heroku/auth/create_token_boundary.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.auth.create_token_boundary",
+      "relativePath": "target/test-classes/f1_api/auth/create_token_boundary.feature",
+      "fileName": "target.test-classes.f1_api.auth.create_token_boundary",
       "passed": true,
       "failed": false,
-      "durationMillis": 4958,
+      "durationMillis": 4591,
       "scenarioCount": 4,
       "passedCount": 4,
       "failedCount": 0,
@@ -223,39 +223,39 @@
           "name": "TOKEN1",
           "refId": "[1.1:9]",
           "passed": true,
-          "durationMillis": 1389,
+          "durationMillis": 1448,
           "tags": null
         },
         {
           "name": "TOKEN2",
           "refId": "[1.2:9]",
           "passed": true,
-          "durationMillis": 982,
+          "durationMillis": 1089,
           "tags": null
         },
         {
           "name": "TOKEN3",
           "refId": "[1.3:9]",
           "passed": true,
-          "durationMillis": 935,
+          "durationMillis": 1025,
           "tags": null
         },
         {
           "name": "TOKEN4",
           "refId": "[1.4:9]",
           "passed": true,
-          "durationMillis": 961,
+          "durationMillis": 968,
           "tags": null
         }
       ]
     },
     {
       "name": "SQL Injection attempt",
-      "relativePath": "target/test-classes/f1_api/van_heroku/auth/security1.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.auth.security1",
+      "relativePath": "target/test-classes/f1_api/auth/security1.feature",
+      "fileName": "target.test-classes.f1_api.auth.security1",
       "passed": true,
       "failed": false,
-      "durationMillis": 1009,
+      "durationMillis": 1076,
       "scenarioCount": 1,
       "passedCount": 1,
       "failedCount": 0,
@@ -264,18 +264,18 @@
           "name": "SQL Injection attempt",
           "refId": "[1:2]",
           "passed": true,
-          "durationMillis": 1009,
+          "durationMillis": 1076,
           "tags": null
         }
       ]
     },
     {
       "name": "noSQL Injection attempt",
-      "relativePath": "target/test-classes/f1_api/van_heroku/auth/security2.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.auth.security2",
+      "relativePath": "target/test-classes/f1_api/auth/security2.feature",
+      "fileName": "target.test-classes.f1_api.auth.security2",
       "passed": true,
       "failed": false,
-      "durationMillis": 1017,
+      "durationMillis": 1063,
       "scenarioCount": 1,
       "passedCount": 1,
       "failedCount": 0,
@@ -284,18 +284,18 @@
           "name": "NoSQL Injection attempt",
           "refId": "[1:3]",
           "passed": true,
-          "durationMillis": 1016,
+          "durationMillis": 1063,
           "tags": null
         }
       ]
     },
     {
       "name": "noSQL Injection attempt",
-      "relativePath": "target/test-classes/f1_api/van_heroku/auth/security3.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.auth.security3",
+      "relativePath": "target/test-classes/f1_api/auth/security3.feature",
+      "fileName": "target.test-classes.f1_api.auth.security3",
       "passed": true,
       "failed": false,
-      "durationMillis": 954,
+      "durationMillis": 1005,
       "scenarioCount": 1,
       "passedCount": 1,
       "failedCount": 0,
@@ -304,18 +304,18 @@
           "name": "NoSQL Injection attempt",
           "refId": "[1:3]",
           "passed": true,
-          "durationMillis": 939,
+          "durationMillis": 1005,
           "tags": null
         }
       ]
     },
     {
       "name": "User enumeration",
-      "relativePath": "target/test-classes/f1_api/van_heroku/auth/security4.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.auth.security4",
+      "relativePath": "target/test-classes/f1_api/auth/security4.feature",
+      "fileName": "target.test-classes.f1_api.auth.security4",
       "passed": true,
       "failed": false,
-      "durationMillis": 1994,
+      "durationMillis": 2016,
       "scenarioCount": 2,
       "passedCount": 2,
       "failedCount": 0,
@@ -324,25 +324,25 @@
           "name": "User enumeration check",
           "refId": "[1:3]",
           "passed": true,
-          "durationMillis": 1016,
+          "durationMillis": 1003,
           "tags": null
         },
         {
           "name": "Non-existing user",
           "refId": "[2:9]",
           "passed": true,
-          "durationMillis": 978,
+          "durationMillis": 1009,
           "tags": null
         }
       ]
     },
     {
       "name": "Timing attack check",
-      "relativePath": "target/test-classes/f1_api/van_heroku/auth/security5.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.auth.security5",
+      "relativePath": "target/test-classes/f1_api/auth/security5.feature",
+      "fileName": "target.test-classes.f1_api.auth.security5",
       "passed": true,
       "failed": false,
-      "durationMillis": 1221,
+      "durationMillis": 1243,
       "scenarioCount": 1,
       "passedCount": 1,
       "failedCount": 0,
@@ -351,18 +351,18 @@
           "name": "Timing attack check",
           "refId": "[1:3]",
           "passed": true,
-          "durationMillis": 1221,
+          "durationMillis": 1227,
           "tags": null
         }
       ]
     },
     {
       "name": "Token should be random",
-      "relativePath": "target/test-classes/f1_api/van_heroku/auth/security6.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.auth.security6",
+      "relativePath": "target/test-classes/f1_api/auth/security6.feature",
+      "fileName": "target.test-classes.f1_api.auth.security6",
       "passed": true,
       "failed": false,
-      "durationMillis": 1221,
+      "durationMillis": 1235,
       "scenarioCount": 1,
       "passedCount": 1,
       "failedCount": 0,
@@ -371,18 +371,18 @@
           "name": "Token should be random",
           "refId": "[1:3]",
           "passed": true,
-          "durationMillis": 1221,
+          "durationMillis": 1234,
           "tags": null
         }
       ]
     },
     {
       "name": "Brute Force Security Test",
-      "relativePath": "target/test-classes/f1_api/van_heroku/auth/security7.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.auth.security7",
+      "relativePath": "target/test-classes/f1_api/auth/security7.feature",
+      "fileName": "target.test-classes.f1_api.auth.security7",
       "passed": false,
       "failed": true,
-      "durationMillis": 85224,
+      "durationMillis": 93594,
       "scenarioCount": 1,
       "passedCount": 0,
       "failedCount": 1,
@@ -391,18 +391,18 @@
           "name": "Try attack by user and password",
           "refId": "[1:3]",
           "passed": false,
-          "durationMillis": 85223,
+          "durationMillis": 93591,
           "tags": null
         }
       ]
     },
     {
       "name": "Booking",
-      "relativePath": "target/test-classes/f1_api/van_heroku/booking/bookingGet1.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.booking.bookingget1",
+      "relativePath": "target/test-classes/f1_api/booking/bookingGet1.feature",
+      "fileName": "target.test-classes.f1_api.booking.bookingget1",
       "passed": true,
       "failed": false,
-      "durationMillis": 48,
+      "durationMillis": 41,
       "scenarioCount": 6,
       "passedCount": 6,
       "failedCount": 0,
@@ -411,97 +411,97 @@
           "name": "GBK-EP-01 - Get booking detail by id",
           "refId": "[1:7]",
           "passed": true,
-          "durationMillis": 0,
+          "durationMillis": 10,
           "tags": null
         },
         {
           "name": "GBK-EP2-02 - Miền dữ liệu không hợp lệ",
           "refId": "[2:28]",
           "passed": true,
-          "durationMillis": 16,
+          "durationMillis": 3,
           "tags": null
         },
         {
           "name": "GBK-BVA-01- Min+",
           "refId": "[3:33]",
           "passed": true,
-          "durationMillis": 0,
+          "durationMillis": 5,
           "tags": null
         },
         {
           "name": "GBK-BVA-02- nom",
           "refId": "[4:53]",
           "passed": true,
-          "durationMillis": 15,
+          "durationMillis": 6,
           "tags": null
         },
         {
           "name": "GBK-BVA-03- Max-",
           "refId": "[5:73]",
           "passed": true,
-          "durationMillis": 0,
+          "durationMillis": 6,
           "tags": null
         },
         {
           "name": "GBK-BVA-04- Max",
           "refId": "[6:93]",
           "passed": true,
-          "durationMillis": 16,
+          "durationMillis": 5,
           "tags": null
         }
       ]
     },
     {
       "name": "BookingIds",
-      "relativePath": "target/test-classes/f1_api/van_heroku/booking/bookingGet2.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.booking.bookingget2",
+      "relativePath": "target/test-classes/f1_api/booking/bookingGet2.feature",
+      "fileName": "target.test-classes.f1_api.booking.bookingget2",
       "passed": false,
       "failed": true,
-      "durationMillis": 120,
+      "durationMillis": 80,
       "scenarioCount": 10,
-      "passedCount": 9,
-      "failedCount": 1,
+      "passedCount": 8,
+      "failedCount": 2,
       "scenarios": [
         {
           "name": "GBK-EP-01  get booking ids and validate response",
           "refId": "[1:6]",
           "passed": true,
-          "durationMillis": 18,
+          "durationMillis": 7,
           "tags": null
         },
         {
           "name": "GBK-EP-02 - Filter theo firstname tồn tại",
           "refId": "[2:15]",
-          "passed": true,
-          "durationMillis": 20,
+          "passed": false,
+          "durationMillis": 9,
           "tags": null
         },
         {
           "name": "GBK-EP-03 - Filter theo lastname tồn tại",
           "refId": "[3:23]",
           "passed": true,
-          "durationMillis": 15,
+          "durationMillis": 6,
           "tags": null
         },
         {
           "name": "GBK-EP-04 - Filter kết hợp firstname + lastname",
           "refId": "[4:31]",
           "passed": true,
-          "durationMillis": 8,
+          "durationMillis": 6,
           "tags": null
         },
         {
           "name": "GBK-EP-05 - Filter không khớp bất kỳ record nào",
           "refId": "[5:41]",
           "passed": true,
-          "durationMillis": 0,
+          "durationMillis": 3,
           "tags": null
         },
         {
           "name": "GBK-BVA-01 - firstname = chuỗi 1 ký tự",
           "refId": "[6:50]",
           "passed": true,
-          "durationMillis": 21,
+          "durationMillis": 6,
           "tags": null
         },
         {
@@ -515,32 +515,32 @@
           "name": "GBK-BVA-03 - checkin ngày hợp lệ đúng format",
           "refId": "[8:64]",
           "passed": true,
-          "durationMillis": 8,
+          "durationMillis": 4,
           "tags": null
         },
         {
           "name": "GBK-BVA-04 - checkin sai định dạng",
           "refId": "[9:71]",
           "passed": false,
-          "durationMillis": 9,
+          "durationMillis": 12,
           "tags": null
         },
         {
           "name": "GBK-BVA-05 - checkout nhỏ hơn checkin",
           "refId": "[10:77]",
           "passed": true,
-          "durationMillis": 1,
+          "durationMillis": 6,
           "tags": null
         }
       ]
     },
     {
       "name": "Create Booking API",
-      "relativePath": "target/test-classes/f1_api/van_heroku/booking/createBooking.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.booking.createbooking",
+      "relativePath": "target/test-classes/f1_api/booking/createBooking.feature",
+      "fileName": "target.test-classes.f1_api.booking.createbooking",
       "passed": true,
       "failed": false,
-      "durationMillis": 47,
+      "durationMillis": 37,
       "scenarioCount": 5,
       "passedCount": 5,
       "failedCount": 0,
@@ -549,55 +549,55 @@
           "name": "CBK-EP-01 - Đầy đủ field hợp lệ",
           "refId": "[1:8]",
           "passed": true,
-          "durationMillis": 15,
+          "durationMillis": 6,
           "tags": null
         },
         {
           "name": "CBK-EP-02 - Thiếu firstname",
           "refId": "[2:47]",
           "passed": true,
-          "durationMillis": 0,
+          "durationMillis": 7,
           "tags": null
         },
         {
           "name": "CBK-EP-03 - Thiếu bookingdates",
           "refId": "[3:65]",
           "passed": true,
-          "durationMillis": 16,
+          "durationMillis": 6,
           "tags": null
         },
         {
           "name": "CBK-EP-04 - depositpaid = false",
           "refId": "[4:80]",
           "passed": true,
-          "durationMillis": 0,
+          "durationMillis": 5,
           "tags": null
         },
         {
           "name": "CBK-EP-05 - totalprice sai kiểu dữ liệu",
           "refId": "[5:101]",
           "passed": true,
-          "durationMillis": 16,
+          "durationMillis": 5,
           "tags": null
         }
       ]
     },
     {
       "name": "Delete Booking API",
-      "relativePath": "target/test-classes/f1_api/van_heroku/booking/deleteBooking.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.booking.deletebooking",
-      "passed": false,
-      "failed": true,
-      "durationMillis": 6228,
+      "relativePath": "target/test-classes/f1_api/booking/deleteBooking.feature",
+      "fileName": "target.test-classes.f1_api.booking.deletebooking",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 6452,
       "scenarioCount": 5,
-      "passedCount": 3,
-      "failedCount": 2,
+      "passedCount": 5,
+      "failedCount": 0,
       "scenarios": [
         {
           "name": "DEL-EP-01 xoá thành công với token hợp lệ",
           "refId": "[1:22]",
-          "passed": false,
-          "durationMillis": 1259,
+          "passed": true,
+          "durationMillis": 1274,
           "tags": null
         },
         {
@@ -611,142 +611,142 @@
           "name": "DEL-EP-03 xoá không hợp lệ: token sai",
           "refId": "[3:37]",
           "passed": true,
-          "durationMillis": 1207,
+          "durationMillis": 1275,
           "tags": null
         },
         {
           "name": "DEL-EP-04 xoá booking đã bị xoá",
           "refId": "[4:45]",
-          "passed": false,
-          "durationMillis": 1236,
+          "passed": true,
+          "durationMillis": 1432,
           "tags": null
         },
         {
           "name": "DEL-EP-05 xoá booking không tồn tại",
           "refId": "[5:60]",
           "passed": true,
-          "durationMillis": 1277,
+          "durationMillis": 1218,
           "tags": null
         }
       ]
     },
     {
       "name": "Update firstname of booking",
-      "relativePath": "target/test-classes/f1_api/van_heroku/booking/updateBooking.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.booking.updatebooking",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 7378,
+      "relativePath": "target/test-classes/f1_api/booking/updateBooking.feature",
+      "fileName": "target.test-classes.f1_api.booking.updatebooking",
+      "passed": false,
+      "failed": true,
+      "durationMillis": 6501,
       "scenarioCount": 5,
-      "passedCount": 5,
-      "failedCount": 0,
+      "passedCount": 0,
+      "failedCount": 5,
       "scenarios": [
         {
           "name": "UPD-EP-01 cập nhật hợp lệ",
           "refId": "[1:20]",
-          "passed": true,
-          "durationMillis": 1430,
+          "passed": false,
+          "durationMillis": 1363,
           "tags": null
         },
         {
           "name": "UPD-EP-02 cập nhật không hợp lệ: không có token",
           "refId": "[2:38]",
-          "passed": true,
-          "durationMillis": 1439,
+          "passed": false,
+          "durationMillis": 1284,
           "tags": null
         },
         {
           "name": "UPD-EP-03 cập nhật không hợp lệ: Token sai",
           "refId": "[3:52]",
-          "passed": true,
-          "durationMillis": 1485,
+          "passed": false,
+          "durationMillis": 1319,
           "tags": null
         },
         {
           "name": "UPD-EP-04 cập nhật không hợp lệ: Booking không tồn tại",
           "refId": "[4:66]",
-          "passed": true,
-          "durationMillis": 1526,
+          "passed": false,
+          "durationMillis": 1292,
           "tags": null
         },
         {
           "name": "UPD-EP-05 cập nhật không hợp lệ: Body thiếu",
           "refId": "[5:80]",
-          "passed": true,
-          "durationMillis": 1494,
+          "passed": false,
+          "durationMillis": 1239,
           "tags": null
         }
       ]
     },
     {
       "name": "Partial Update Booking API",
-      "relativePath": "target/test-classes/f1_api/van_heroku/booking/updateBooking2.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.booking.updatebooking2",
-      "passed": true,
-      "failed": false,
-      "durationMillis": 9125,
+      "relativePath": "target/test-classes/f1_api/booking/updateBooking2.feature",
+      "fileName": "target.test-classes.f1_api.booking.updatebooking2",
+      "passed": false,
+      "failed": true,
+      "durationMillis": 9051,
       "scenarioCount": 7,
-      "passedCount": 7,
-      "failedCount": 0,
+      "passedCount": 2,
+      "failedCount": 5,
       "scenarios": [
         {
           "name": "PAT-EP-01 cập nhật 1 field",
           "refId": "[1:20]",
-          "passed": true,
-          "durationMillis": 1485,
+          "passed": false,
+          "durationMillis": 1233,
           "tags": null
         },
         {
           "name": "PAT-EP-02 cập nhật nhiều field cùng lúc",
           "refId": "[2:46]",
-          "passed": true,
-          "durationMillis": 1536,
+          "passed": false,
+          "durationMillis": 1272,
           "tags": null
         },
         {
           "name": "PAT-EP-03 cập nhật không hợp lệ: không có token",
           "refId": "[3:74]",
           "passed": true,
-          "durationMillis": 1213,
+          "durationMillis": 1279,
           "tags": null
         },
         {
           "name": "PAT-EP-04 field không tồn tại trong schema",
           "refId": "[4:88]",
-          "passed": true,
-          "durationMillis": 1265,
+          "passed": false,
+          "durationMillis": 1254,
           "tags": null
         },
         {
           "name": "PAT-BVA-01 body rỗng {}",
           "refId": "[5:107]",
-          "passed": true,
-          "durationMillis": 1199,
+          "passed": false,
+          "durationMillis": 1239,
           "tags": null
         },
         {
           "name": "PAT-BVA-02 firstname là chuỗi rỗng",
           "refId": "[6:120]",
           "passed": true,
-          "durationMillis": 1189,
+          "durationMillis": 1389,
           "tags": null
         },
         {
           "name": "PAT-BVA-03 totalprice = 0",
           "refId": "[7:138]",
-          "passed": true,
-          "durationMillis": 1236,
+          "passed": false,
+          "durationMillis": 1381,
           "tags": null
         }
       ]
     },
     {
       "name": "Ping API",
-      "relativePath": "target/test-classes/f1_api/van_heroku/ping/ping.feature",
-      "fileName": "target.test-classes.f1_api.van_heroku.ping.ping",
+      "relativePath": "target/test-classes/f1_api/ping/ping.feature",
+      "fileName": "target.test-classes.f1_api.ping.ping",
       "passed": true,
       "failed": false,
-      "durationMillis": 2001,
+      "durationMillis": 2048,
       "scenarioCount": 2,
       "passedCount": 2,
       "failedCount": 0,
@@ -755,14 +755,14 @@
           "name": "PNG-EP-01 Health check cơ bản",
           "refId": "[1:8]",
           "passed": true,
-          "durationMillis": 1016,
+          "durationMillis": 1010,
           "tags": null
         },
         {
           "name": "PNG-EP-02 Sai HTTP method POST /ping",
           "refId": "[2:17]",
           "passed": true,
-          "durationMillis": 970,
+          "durationMillis": 1037,
           "tags": null
         }
       ]

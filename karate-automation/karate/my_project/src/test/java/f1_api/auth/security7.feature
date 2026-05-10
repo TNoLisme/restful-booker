@@ -2,7 +2,7 @@ Feature: Brute Force Security Test
 
 Scenario: Try attack by user and password
 
-    * def rawData = read('classpath:f1_api/van_heroku/auth/data/pass_use.txt')
+    * def rawData = read('classpath:f1_api/auth/data/pass_use.txt')
     * def creds = karate.filter(rawData.split('\n'), function(x){ return x.trim().length > 0 })
 
     * def securityBug = null
@@ -46,4 +46,4 @@ Scenario: Try attack by user and password
 
     * print 'Security bug result:', securityBug
 
-    * match securityBug == null
+    * match securityBug == null # gpt đề xuất là != null, cần check

@@ -1,3 +1,4 @@
+f4_mock\RestfulBookerMockServer.class
 f4_mock\MockRunner.class
-f1_api\ApiTest.class
 f3_ui\UiTest.class
+f3_ui\ApiTest.class
