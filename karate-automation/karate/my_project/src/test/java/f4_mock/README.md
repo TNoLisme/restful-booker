@@ -58,10 +58,10 @@ mvn test-compile exec:java -Dexec.mainClass=f4_mock.RestfulBookerMockServer -Dex
 mvn test -Dtest=f4_mock.MockRunner
 ```
 
-Sau khi test pass, mo report tai:
+Sau khi test pass, mo report mock server tai:
 
 ```text
-target/karate-reports/index.html
+target/karate-reports/mockserver-sumary.html
 ```
 
 Mock co them endpoint tien ich `POST /reset` de dua du lieu test ve trang thai ban dau.

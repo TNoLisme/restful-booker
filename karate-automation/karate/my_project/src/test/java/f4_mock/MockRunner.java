@@ -3,6 +3,10 @@ package f4_mock;
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
 import com.intuit.karate.core.MockServer;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
@@ -19,9 +23,22 @@ class MockRunner {
                     .systemProperty("mockBaseUrl", "http://localhost:" + server.getPort())
                     .outputHtmlReport(true)
                     .parallel(1);
+            createMockServerReport();
             assertEquals(0, results.getFailCount(), results.getErrorMessages());
         } finally {
             server.stop();
+        }
+    }
+
+    private static void createMockServerReport() {
+        Path reportDir = Path.of("target", "karate-reports");
+        Path karateSummary = reportDir.resolve("karate-summary.html");
+        Path mockServerSummary = reportDir.resolve("mockserver-sumary.html");
+        try {
+            Files.copy(karateSummary, mockServerSummary, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Mock server report: " + mockServerSummary.toAbsolutePath());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create mockserver-sumary.html", e);
         }
     }
 }
