@@ -4,27 +4,7 @@ const router = express.Router(),
     crypto = require('crypto'),
     Booking = require('../models/booking'),
     validator = require('../helpers/validator'),
-    creator = require('../helpers/bookingcreator'),
 globalLogins = {};
-
-const { v4: uuidv4 } = require('uuid');
-
-if(process.env.SEED === 'true'){
-  let count = 1;
-
-  (function createBooking(){
-    const newBooking = creator.createBooking();
-
-    Booking.create(newBooking, function(err, result){
-      if(err) return console.error(err);
-
-      if(count < 10){
-        count++;
-        createBooking();
-      }
-    });
-  })()
-};
 
 /**
  * @api {get} ping HealthCheck

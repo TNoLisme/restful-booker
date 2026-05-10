@@ -1,0 +1,182 @@
+[
+  {
+    "bookingid": 1,
+    "firstname": "An",
+    "lastname": "Nguyen",
+    "totalprice": 168,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-05-12", "checkout": "2026-05-15" },
+    "additionalneeds": "Breakfast, Airport Shuttle"
+  },
+  {
+    "bookingid": 2,
+    "firstname": "Linh",
+    "lastname": "Tran",
+    "totalprice": 245,
+    "depositpaid": false,
+    "bookingdates": { "checkin": "2026-05-14", "checkout": "2026-05-18" },
+    "additionalneeds": "High Floor"
+  },
+  {
+    "bookingid": 3,
+    "firstname": "Minh",
+    "lastname": "Pham",
+    "totalprice": 132,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-05-16", "checkout": "2026-05-17" },
+    "additionalneeds": "Extra Bed"
+  },
+  {
+    "bookingid": 4,
+    "firstname": "Mai",
+    "lastname": "Le",
+    "totalprice": 319,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-05-20", "checkout": "2026-05-24" },
+    "additionalneeds": "Breakfast, Late Checkout"
+  },
+  {
+    "bookingid": 5,
+    "firstname": "Khoa",
+    "lastname": "Vo",
+    "totalprice": 99,
+    "depositpaid": false,
+    "bookingdates": { "checkin": "2026-05-22", "checkout": "2026-05-23" },
+    "additionalneeds": "Quiet Room"
+  },
+  {
+    "bookingid": 6,
+    "firstname": "Hana",
+    "lastname": "Kim",
+    "totalprice": 205,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-05-25", "checkout": "2026-05-28" },
+    "additionalneeds": "Airport Shuttle"
+  },
+  {
+    "bookingid": 7,
+    "firstname": "David",
+    "lastname": "Brown",
+    "totalprice": 188,
+    "depositpaid": false,
+    "bookingdates": { "checkin": "2026-06-01", "checkout": "2026-06-04" },
+    "additionalneeds": "Breakfast"
+  },
+  {
+    "bookingid": 8,
+    "firstname": "Sara",
+    "lastname": "Miller",
+    "totalprice": 410,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-06-03", "checkout": "2026-06-09" },
+    "additionalneeds": "Spa Voucher, High Floor"
+  },
+  {
+    "bookingid": 9,
+    "firstname": "Tuan",
+    "lastname": "Bui",
+    "totalprice": 152,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-06-06", "checkout": "2026-06-08" },
+    "additionalneeds": "Extra Pillows"
+  },
+  {
+    "bookingid": 10,
+    "firstname": "Nhi",
+    "lastname": "Dang",
+    "totalprice": 275,
+    "depositpaid": false,
+    "bookingdates": { "checkin": "2026-06-10", "checkout": "2026-06-14" },
+    "additionalneeds": "Vegetarian Breakfast"
+  },
+  {
+    "bookingid": 11,
+    "firstname": "Olivia",
+    "lastname": "Wilson",
+    "totalprice": 220,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-06-12", "checkout": "2026-06-16" },
+    "additionalneeds": "Airport Shuttle, Baby Cot"
+  },
+  {
+    "bookingid": 12,
+    "firstname": "Noah",
+    "lastname": "Davis",
+    "totalprice": 118,
+    "depositpaid": false,
+    "bookingdates": { "checkin": "2026-06-15", "checkout": "2026-06-16" },
+    "additionalneeds": "Late Arrival"
+  },
+  {
+    "bookingid": 13,
+    "firstname": "Vy",
+    "lastname": "Hoang",
+    "totalprice": 304,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-06-18", "checkout": "2026-06-22" },
+    "additionalneeds": "Breakfast, Ocean View"
+  },
+  {
+    "bookingid": 14,
+    "firstname": "Quan",
+    "lastname": "Do",
+    "totalprice": 140,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-06-21", "checkout": "2026-06-23" },
+    "additionalneeds": "Workspace Setup"
+  },
+  {
+    "bookingid": 15,
+    "firstname": "Emma",
+    "lastname": "Taylor",
+    "totalprice": 360,
+    "depositpaid": false,
+    "bookingdates": { "checkin": "2026-06-25", "checkout": "2026-06-30" },
+    "additionalneeds": "Airport Shuttle, Extra Bed"
+  },
+  {
+    "bookingid": 16,
+    "firstname": "Bao",
+    "lastname": "Lam",
+    "totalprice": 176,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-07-02", "checkout": "2026-07-04" },
+    "additionalneeds": "Breakfast"
+  },
+  {
+    "bookingid": 17,
+    "firstname": "Iris",
+    "lastname": "Chen",
+    "totalprice": 295,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-07-05", "checkout": "2026-07-09" },
+    "additionalneeds": "High Floor, Late Checkout"
+  },
+  {
+    "bookingid": 18,
+    "firstname": "Jack",
+    "lastname": "Moore",
+    "totalprice": 89,
+    "depositpaid": false,
+    "bookingdates": { "checkin": "2026-07-08", "checkout": "2026-07-09" },
+    "additionalneeds": "None"
+  },
+  {
+    "bookingid": 19,
+    "firstname": "Ngoc",
+    "lastname": "Phan",
+    "totalprice": 238,
+    "depositpaid": true,
+    "bookingdates": { "checkin": "2026-07-11", "checkout": "2026-07-15" },
+    "additionalneeds": "Breakfast, Anniversary Setup"
+  },
+  {
+    "bookingid": 20,
+    "firstname": "Ryan",
+    "lastname": "Clark",
+    "totalprice": 126,
+    "depositpaid": false,
+    "bookingdates": { "checkin": "2026-07-16", "checkout": "2026-07-18" },
+    "additionalneeds": "Early Checkin"
+  }
+]

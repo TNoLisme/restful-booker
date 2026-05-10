@@ -1,8 +1,25 @@
 const loki = require('lokijs');
+const mockBookings = require('../data/mock-bookings.json');
 
 let counter = 0;
 const db = new loki('booking.db');
 const booking = db.addCollection('bookings');
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function seedMockBookings() {
+  booking.clear();
+  mockBookings.forEach(function(mockBooking) {
+    booking.insert(clone(mockBooking));
+  });
+  counter = mockBookings.reduce(function(max, mockBooking) {
+    return Math.max(max, Number(mockBooking.bookingid) || 0);
+  }, 0);
+}
+
+seedMockBookings();
 
 exports.getIDs = function(query, callback) {
   try {
