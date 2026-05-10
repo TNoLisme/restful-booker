@@ -18,6 +18,17 @@
             font-size: 1.2em;
             font-family: 'Muli', Arial, Helvetica, sans-serif;
         }
+
+        .jumbotron {
+            position: relative;
+        }
+
+        .signin-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
 	</style>
 
   <!-- Google tag (gtag.js) -->
@@ -39,6 +50,9 @@
             <h1>Welcome to Restful-Booker</h1>
             <p>An API playground created by <a href="http://mwtestconsultancy.co.uk/">Mark Winteringham</a> for those wanting to learn more about API testing and tools</p>
           </div>
+        </div>
+        <div class="signin-button">
+          <a href="/signin" class="btn btn-primary btn-lg" role="button">Sign In</a>
         </div>
         <div class="row">
           <div class="col-12 text-center">

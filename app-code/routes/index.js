@@ -25,6 +25,10 @@ router.get('/ping', function(req, res, next) {
   res.sendStatus(201);
 });
 
+router.get('/signin', function(req, res, next) {
+  res.redirect(302, 'http://localhost:5173/');
+});
+
 /**
  * @api {get} booking GetBookingIds
  * @apiName GetBookings
