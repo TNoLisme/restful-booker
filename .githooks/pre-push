@@ -1,11 +1,24 @@
 #!/bin/sh
 set -eu
 
+# Chon mot kich ban pre-push gate bang cach comment / uncomment.
+# F1: chay API test that voi backend local, hien co the fail de demo bat loi.
+# F4: chay mock testing, on dinh hon va phu hop demo pass nhu CI gate hien tai.
+#
+# PRE_PUSH_SUITE=f1
+PRE_PUSH_SUITE=f1
+
 zero_sha=0000000000000000000000000000000000000000
+carriage_return=$(printf '\r')
 should_run=0
 
 while read local_ref local_sha remote_ref remote_sha
 do
+  local_ref=${local_ref%$carriage_return}
+  local_sha=${local_sha%$carriage_return}
+  remote_ref=${remote_ref%$carriage_return}
+  remote_sha=${remote_sha%$carriage_return}
+
   if [ "$local_sha" = "$zero_sha" ]; then
     continue
   fi
@@ -16,36 +29,22 @@ do
     changed_files=$(git diff --name-only "$remote_sha" "$local_sha")
   fi
 
-  if echo "$changed_files" | grep -q '^app-code/'; then
-    should_run=1
-  fi
+  for changed_file in $changed_files
+  do
+    case "$changed_file" in
+      app-code/*|karate-automation/karate/my_project/*|.github/workflows/app-code-api-gate.yml)
+        should_run=1
+        ;;
+    esac
+  done
 done
 
 if [ "$should_run" -eq 0 ]; then
-  echo "No app-code changes detected; skipping API gate."
+  echo "No CI-gated changes detected; skipping pre-push gate."
   exit 0
 fi
 
-echo "app-code changes detected; running API gate before push."
-
-server_pid=""
-if ! curl -fsS http://localhost:3001/ping >/dev/null 2>&1; then
-  echo "Starting local Restful-Booker backend on port 3001."
-  (cd app-code && npm install && npm start) &
-  server_pid=$!
-
-  i=1
-  until curl -fsS http://localhost:3001/ping >/dev/null 2>&1
-  do
-    i=$((i + 1))
-    if [ "$i" -gt 30 ]; then
-      echo "Backend did not become ready on http://localhost:3001."
-      [ -n "$server_pid" ] && kill "$server_pid" >/dev/null 2>&1 || true
-      exit 1
-    fi
-    sleep 2
-  done
-fi
+echo "CI-gated changes detected; running pre-push gate: $PRE_PUSH_SUITE."
 
 if command -v mvn.cmd >/dev/null 2>&1; then
   maven_cmd=mvn.cmd
@@ -53,8 +52,47 @@ else
   maven_cmd=mvn
 fi
 
-(cd karate-automation/karate/my_project && "$maven_cmd" clean test -Dtest=ApiTest)
-result=$?
+server_pid=""
+result=0
+
+case "$PRE_PUSH_SUITE" in
+  f1)
+    if ! curl -fsS http://localhost:3001/ping >/dev/null 2>&1; then
+      echo "Starting local Restful-Booker backend on port 3001."
+      (cd app-code && npm install && npm start) &
+      server_pid=$!
+
+      i=1
+      until curl -fsS http://localhost:3001/ping >/dev/null 2>&1
+      do
+        i=$((i + 1))
+        if [ "$i" -gt 30 ]; then
+          echo "Backend did not become ready on http://localhost:3001."
+          [ -n "$server_pid" ] && kill "$server_pid" >/dev/null 2>&1 || true
+          exit 1
+        fi
+        sleep 2
+      done
+    fi
+
+    echo "Running F1 API gate: ApiTest."
+    set +e
+    (cd karate-automation/karate/my_project && "$maven_cmd" clean test -Dtest=ApiTest)
+    result=$?
+    set -e
+    ;;
+  f4)
+    echo "Running F4 mock gate: MockRunner."
+    set +e
+    (cd karate-automation/karate/my_project && "$maven_cmd" clean test -Dtest=MockRunner)
+    result=$?
+    set -e
+    ;;
+  *)
+    echo "Unsupported PRE_PUSH_SUITE: $PRE_PUSH_SUITE. Use f1 or f4."
+    exit 1
+    ;;
+esac
 
 if [ -n "$server_pid" ]; then
   kill "$server_pid" >/dev/null 2>&1 || true
