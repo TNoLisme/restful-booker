@@ -1,0 +1,426 @@
+{
+  "version": "1.0.0",
+  "description": "Karate DSL feature file validation rules",
+  "groups": {
+    "F": "Feature",
+    "B": "Background",
+    "S": "Scenario",
+    "O": "Outline & Examples",
+    "E": "Expression & Variable",
+    "H": "HTTP Keywords",
+    "D": "DocString / Table / Misc"
+  },
+  "rules": [
+    {
+      "id": "F-001",
+      "group": "F",
+      "severity": "ERROR",
+      "title": "Feature phải là từ khóa block đầu tiên",
+      "description": "Dòng không phải comment (#) hoặc tag (@) đầu tiên phải bắt đầu bằng 'Feature:'.",
+      "check": "FIRST_KEYWORD",
+      "params": {
+        "keyword": "Feature",
+        "allowBefore": ["comment", "tag", "blank"]
+      }
+    },
+    {
+      "id": "F-002",
+      "group": "F",
+      "severity": "ERROR",
+      "title": "Feature phải có mô tả sau dấu ':'",
+      "description": "Sau 'Feature:' phải có ít nhất một ký tự không phải khoảng trắng.",
+      "check": "KEYWORD_HAS_DESCRIPTION",
+      "params": {
+        "keyword": "Feature:"
+      }
+    },
+    {
+      "id": "F-003",
+      "group": "F",
+      "severity": "ERROR",
+      "title": "Chỉ được có đúng một khối Feature trong một file",
+      "description": "Mỗi file .feature chỉ được khai báo Feature một lần.",
+      "check": "COUNT_KEYWORD",
+      "params": {
+        "keyword": "Feature",
+        "min": 1,
+        "max": 1
+      }
+    },
+    {
+      "id": "F-004",
+      "group": "F",
+      "severity": "ERROR",
+      "title": "File phải có ít nhất một Scenario hoặc Scenario Outline",
+      "description": "Một file feature hợp lệ phải chứa ít nhất một Scenario hoặc Scenario Outline.",
+      "check": "COUNT_KEYWORD",
+      "params": {
+        "keyword": "Scenario",
+        "includeVariants": ["Scenario Outline"],
+        "min": 1,
+        "max": null
+      }
+    },
+    {
+      "id": "F-005",
+      "group": "F",
+      "severity": "ERROR",
+      "title": "Thứ tự cấu trúc: Feature → Background → Scenario",
+      "description": "Background phải xuất hiện trước Scenario. Không có block nào được đứng trước Feature.",
+      "check": "BLOCK_ORDER",
+      "params": {
+        "order": ["Feature", "Background", "Scenario"]
+      }
+    },
+    {
+      "id": "B-001",
+      "group": "B",
+      "severity": "ERROR",
+      "title": "Chỉ được có tối đa một khối Background",
+      "description": "Karate chỉ cho phép duy nhất một Background trên toàn bộ file.",
+      "check": "COUNT_KEYWORD",
+      "params": {
+        "keyword": "Background",
+        "min": 0,
+        "max": 1
+      }
+    },
+    {
+      "id": "B-002",
+      "group": "B",
+      "severity": "ERROR",
+      "title": "Nội dung Background phải thụt lề so với 'Background:'",
+      "description": "Tất cả các step bên trong Background phải được indent vào so với dòng 'Background:'.",
+      "check": "CHILDREN_INDENTED",
+      "params": {
+        "parent": "Background"
+      }
+    },
+    {
+      "id": "B-003",
+      "group": "B",
+      "severity": "ERROR",
+      "title": "Step trong Background phải bắt đầu bằng từ khóa hợp lệ",
+      "description": "Mỗi dòng step trong Background phải bắt đầu bằng: Given, When, Then, And, But, hoặc *. Ngoại trừ nội dung bên trong \"\"\" hoặc table.",
+      "check": "STEP_KEYWORDS",
+      "params": {
+        "parent": "Background",
+        "validKeywords": ["Given", "When", "Then", "And", "But", "*"],
+        "excludeDocString": true,
+        "excludeTable": true
+      }
+    },
+    {
+      "id": "S-001",
+      "group": "S",
+      "severity": "INFO",
+      "title": "Scenario nên có mô tả sau dấu ':'",
+      "description": "Phần mô tả sau 'Scenario:' hoặc 'Scenario Outline:' không để trống.",
+      "check": "KEYWORD_HAS_DESCRIPTION",
+      "params": {
+        "keyword": "Scenario:",
+        "variants": ["Scenario Outline:"]
+      }
+    },
+    {
+      "id": "S-002",
+      "group": "S",
+      "severity": "INFO",
+      "title": "Nội dung Scenario nên thụt lề so với 'Scenario:'",
+      "description": "Tất cả các step bên trong Scenario phải được indent. Ngoại trừ nội dung trong \"\"\" và table.",
+      "check": "CHILDREN_INDENTED",
+      "params": {
+        "parent": "Scenario"
+      }
+    },
+    {
+      "id": "S-003",
+      "group": "S",
+      "severity": "ERROR",
+      "title": "Step phải bắt đầu bằng từ khóa hợp lệ",
+      "description": "Mỗi dòng step phải bắt đầu bằng: Given, When, Then, And, But, *.",
+      "check": "STEP_KEYWORDS",
+      "params": {
+        "parent": "Scenario",
+        "validKeywords": ["Given", "When", "Then", "And", "But", "*"],
+        "excludeDocString": true,
+        "excludeTable": true
+      }
+    },
+    {
+      "id": "S-004",
+      "group": "S",
+      "severity": "ERROR",
+      "title": "Scenario phải có ít nhất một step",
+      "description": "Mỗi Scenario phải có ít nhất một bước. Scenario rỗng hoàn toàn là lỗi.",
+      "check": "BLOCK_HAS_CHILDREN",
+      "params": {
+        "parent": "Scenario",
+        "min": 1
+      }
+    },
+    {
+      "id": "S-005",
+      "group": "S",
+      "severity": "WARN",
+      "title": "'Then' không nên đứng trước 'When' trong cùng Scenario",
+      "description": "Thứ tự Given → When → Then nên được tuân thủ theo convention Gherkin.",
+      "check": "STEP_ORDER",
+      "params": {
+        "parent": "Scenario",
+        "order": ["Given", "When", "Then"]
+      }
+    },
+    {
+      "id": "S-006",
+      "group": "S",
+      "severity": "WARN",
+      "title": "'And' và 'But' không được là step đầu tiên trong Scenario",
+      "description": "'And' và 'But' phải đi sau Given/When/Then, không thể mở đầu Scenario.",
+      "check": "FIRST_STEP_NOT",
+      "params": {
+        "parent": "Scenario",
+        "forbiddenFirstKeywords": ["And", "But"]
+      }
+    },
+    {
+      "id": "O-001",
+      "group": "O",
+      "severity": "ERROR",
+      "title": "Scenario Outline bắt buộc phải có khối Examples",
+      "description": "Mỗi Scenario Outline phải đi kèm với một khối 'Examples:' ngay phía sau.",
+      "check": "OUTLINE_HAS_EXAMPLES",
+      "params": {}
+    },
+    {
+      "id": "O-002",
+      "group": "O",
+      "severity": "ERROR",
+      "title": "Examples phải có dòng header và ít nhất 1 dòng data",
+      "description": "Bảng Examples phải có dòng 1 là header, từ dòng 2 là data. Phải có ít nhất 1 data row. Hoặc đọc dữ liệu từ file.",
+      "check": "EXAMPLES_TABLE_STRUCTURE",
+      "params": {
+        "minDataRows": 1
+      }
+    },
+    {
+      "id": "O-003",
+      "group": "O",
+      "severity": "ERROR",
+      "title": "Số cột trong mọi row phải khớp với header",
+      "description": "Mỗi data row trong Examples phải có đúng số cột bằng với header row.",
+      "check": "TABLE_COLUMN_CONSISTENCY",
+      "params": {
+        "context": "Examples"
+      }
+    },
+    {
+      "id": "O-004",
+      "group": "O",
+      "severity": "ERROR",
+      "title": "Placeholder <tên> trong step phải tồn tại trong Examples header",
+      "description": "Mỗi <placeholder> dùng trong steps của Scenario Outline phải có cột cùng tên trong bảng Examples (case-sensitive).",
+      "check": "PLACEHOLDER_IN_EXAMPLES",
+      "params": {}
+    },
+    {
+      "id": "O-005",
+      "group": "O",
+      "severity": "WARN",
+      "title": "Cột trong Examples header không được trùng tên",
+      "description": "Mỗi tên cột trong header của Examples phải là duy nhất.",
+      "check": "TABLE_UNIQUE_HEADERS",
+      "params": {
+        "context": "Examples"
+      }
+    },
+    {
+      "id": "O-006",
+      "group": "O",
+      "severity": "WARN",
+      "title": "Mọi cột trong Examples header nên được dùng ít nhất một lần",
+      "description": "Nếu một cột trong Examples không có <placeholder> tương ứng trong steps, đó là dead data.",
+      "check": "EXAMPLES_COLUMN_USED",
+      "params": {}
+    },
+    {
+      "id": "E-001",
+      "group": "E",
+      "severity": "ERROR",
+      "title": "'def' phải có dấu = và vế phải",
+      "description": "Cú pháp: * def <tên> = <giá_trị>. Tên biến không được có khoảng trắng.",
+      "check": "REGEX_STEP_PATTERN",
+      "params": {
+        "triggerPattern": "^\\s*\\*\\s+def\\s+",
+        "validPattern": "^\\s*\\*\\s+def\\s+[a-zA-Z_][a-zA-Z0-9_]*\\s*=\\s*$|^\\s*\\*\\s+def\\s+[a-zA-Z_][a-zA-Z0-9_]*\\s*=\\s*.+$",
+        "message": "Cú pháp 'def' không hợp lệ. Đúng: * def <tên> = <giá_trị>"
+      }
+    },
+    {
+      "id": "E-002",
+      "group": "E",
+      "severity": "ERROR",
+      "title": "'match' phải dùng toán tử hợp lệ",
+      "description": "Các toán tử match hợp lệ: ==, !=, contains, contains only, contains any, contains deep, !contains, each ==.",
+      "check": "REGEX_STEP_PATTERN",
+      "params": {
+        "triggerPattern": "^\\s*(Then|And|\\*)\\s+match\\s+",
+        "validPattern": "^\\s*(Then|And|\\*)\\s+match\\s+.+?\\s+(==|!=|contains only|contains any|contains deep|contains|!contains deep|!contains|each ==)(\\s*.+)?$",
+        "message": "Toán tử 'match' không hợp lệ. Hợp lệ: ==, !=, contains, contains only, contains any, contains deep, !contains, each =="
+      }
+    },
+    {
+      "id": "E-003",
+      "group": "E",
+      "severity": "ERROR",
+      "title": "Cú pháp JSON inline phải có ngoặc cân bằng",
+      "description": "Tất cả { } [ ] phải cân bằng. String phải có dấu nháy đóng mở đúng.",
+      "check": "BALANCED_BRACKETS",
+      "params": {
+        "triggerKeywords": ["def", "request", "match", "set"]
+      }
+    },
+    {
+      "id": "E-004",
+      "group": "E",
+      "severity": "ERROR",
+      "title": "Biểu thức #(expr) phải có nội dung không rỗng",
+      "description": "#() rỗng là lỗi. Nội dung phải là JS expression hợp lệ.",
+      "check": "REGEX_STEP_PATTERN",
+      "params": {
+        "triggerPattern": "#\\(",
+        "invalidPattern": "#\\(\\s*\\)",
+        "message": "Biểu thức #() không được rỗng"
+      }
+    },
+    {
+      "id": "E-005",
+      "group": "E",
+      "severity": "WARN",
+      "title": "Biến được reference nên được def trước đó",
+      "description": "Dùng biến chưa def → resolve thành null, assertion sai âm thầm.",
+      "check": "VARIABLE_DEFINED_BEFORE_USE",
+      "params": {
+        "builtinVars": ["response", "responseHeaders", "responseStatus", "responseTime", "responseCookies", "requestHeaders", "request", "baseUrl", "karate"]
+      }
+    },
+    {
+      "id": "E-006",
+      "group": "E",
+      "severity": "WARN",
+      "title": "'set' phải có path và giá trị hợp lệ",
+      "description": "Cú pháp: * set <biến>.<path> = <giá_trị>. Path phải là JSONPath hợp lệ.",
+      "check": "REGEX_STEP_PATTERN",
+      "params": {
+        "triggerPattern": "^\\s*\\*\\s+set\\s+",
+        "validPattern": "^\\s*\\*\\s+set\\s+[a-zA-Z_][a-zA-Z0-9_.\\[\\]]*\\s*=\\s*.+$",
+        "message": "Cú pháp 'set' không hợp lệ. Đúng: * set <biến>.<path> = <giá_trị>"
+      }
+    },
+    {
+      "id": "H-001",
+      "group": "H",
+      "severity": "ERROR",
+      "title": "'url' phải được set trước 'method' trong mỗi Scenario",
+      "description": "Trong mỗi Scenario, phải có ít nhất một 'url' hoặc base url trước khi gọi 'method'.",
+      "check": "URL_BEFORE_METHOD",
+      "params": {
+        "urlKeywords": ["url", "path"],
+        "methodKeyword": "method"
+      }
+    },
+    {
+      "id": "H-002",
+      "group": "H",
+      "severity": "ERROR",
+      "title": "'method' chỉ nhận HTTP verb hợp lệ",
+      "description": "Giá trị sau 'method' phải là một trong: get, post, put, patch, delete, head, options, connect, trace.",
+      "check": "REGEX_STEP_PATTERN",
+      "params": {
+        "triggerPattern": "^\\s*(When|And|\\*)\\s+method\\s+",
+        "validPattern": "^\\s*(When|And|\\*)\\s+method\\s+(get|post|put|patch|delete|head|options|connect|trace)\\s*$",
+        "flags": "i",
+        "message": "HTTP verb không hợp lệ. Hợp lệ: get, post, put, patch, delete, head, options, connect, trace"
+      }
+    },
+    {
+      "id": "H-003",
+      "group": "H",
+      "severity": "ERROR",
+      "title": "'status' phải là số nguyên trong khoảng 100–599",
+      "description": "'status' assertion nhận số nguyên HTTP status code hợp lệ.",
+      "check": "REGEX_STEP_PATTERN",
+      "params": {
+        "triggerPattern": "^\\s*(Then|And|\\*)\\s+status\\s+",
+        "validPattern": "^\\s*(Then|And|\\*)\\s+status\\s+(#\\(.+\\)|[1-5][0-9]{2}|<[^>]+>)\\s*$",
+        "message": "Status code phải là số nguyên 100–599"
+      }
+    },
+    {
+      "id": "H-004",
+      "group": "H",
+      "severity": "WARN",
+      "title": "'path' chỉ nên dùng khi 'url' hoặc baseUrl đã được set",
+      "description": "'path' append vào base url — nếu không có url thì trở thành url hoàn chỉnh, thường là bug.",
+      "check": "PATH_REQUIRES_BASE_URL",
+      "params": {}
+    },
+    {
+      "id": "H-005",
+      "group": "H",
+      "severity": "WARN",
+      "title": "'header' phải có dạng 'key = value'",
+      "description": "Cú pháp: And header <Key> = <value>. Thiếu = hoặc thiếu value là lỗi cú pháp.",
+      "check": "REGEX_STEP_PATTERN",
+      "params": {
+        "triggerPattern": "^\\s*(Given|When|Then|And|But|\\*)\\s+header\\s+",
+        "validPattern": "^\\s*(Given|When|Then|And|But|\\*)\\s+header\\s+[^=]+=.+$",
+        "message": "Cú pháp 'header' không hợp lệ. Đúng: header <Key> = <value>"
+      }
+    },
+    {
+      "id": "D-001",
+      "group": "D",
+      "severity": "ERROR",
+      "title": "Doc String phải mở và đóng bằng \"\"\"",
+      "description": "Multiline string phải được bao bởi đúng 3 dấu nháy kép ở cả dòng mở và dòng đóng.",
+      "check": "DOCSTRING_BALANCED",
+      "params": {}
+    },
+    {
+      "id": "D-002",
+      "group": "D",
+      "severity": "ERROR",
+      "title": "Data Table phải có | đồng nhất ở đầu và cuối mỗi dòng",
+      "description": "Mỗi dòng của table phải bắt đầu và kết thúc bằng |. Số cell phải đồng nhất.",
+      "check": "TABLE_FORMAT",
+      "params": {}
+    },
+    {
+      "id": "D-003",
+      "group": "D",
+      "severity": "ERROR",
+      "title": "'call read()' phải có chuỗi path hợp lệ",
+      "description": "Path phải là chuỗi không rỗng, thường bắt đầu bằng 'classpath:' hoặc relative path. Không dùng absolute path.",
+      "check": "REGEX_STEP_PATTERN",
+      "params": {
+        "triggerPattern": "call\\s+read\\s*\\(",
+        "invalidPattern": "call\\s+read\\s*\\(\\s*['\"]?\\s*['\"]?\\s*\\)|call\\s+read\\s*\\(\\s*['\"]\\s*['\"]\\s*\\)|call\\s+read\\s*\\(\\s*['\"][/\\\\]",
+        "message": "'call read()' phải có path không rỗng và không dùng absolute path"
+      }
+    },
+    {
+      "id": "D-004",
+      "group": "D",
+      "severity": "ERROR",
+      "title": "'print' phải có ít nhất một argument",
+      "description": "Cú pháp: * print <value> [, <value2> ...]. Phải có ít nhất một giá trị sau từ khóa print.",
+      "check": "REGEX_STEP_PATTERN",
+      "params": {
+        "triggerPattern": "^\\s*\\*\\s+print\\s*$",
+        "invalidPattern": "^\\s*\\*\\s+print\\s*$",
+        "message": "'print' phải có ít nhất một argument"
+      }
+    }
+  ]
+}
