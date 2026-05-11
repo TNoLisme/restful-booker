@@ -6,7 +6,7 @@ set -eu
 # F4: chay mock testing, on dinh hon va phu hop demo pass nhu CI gate hien tai.
 #
 # PRE_PUSH_SUITE=f1
-PRE_PUSH_SUITE=f1
+PRE_PUSH_SUITE=f4
 
 zero_sha=0000000000000000000000000000000000000000
 carriage_return=$(printf '\r')
