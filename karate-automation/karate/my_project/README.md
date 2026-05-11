@@ -1,86 +1,133 @@
-# Restful-Booker Karate Test Project
+# Restful-Booker Karate Testing
 
-Thu muc nay chua bo kiem thu Karate cho du an Restful-Booker local. Muc tieu khong phai la ep moi test deu pass, ma la dung test de phat hien loi API, UI, mock va hieu nang khi code trong `app-code` thay doi.
+Thư mục này chứa bộ kiểm thử Karate chính cho dự án Restful-Booker local. Bộ test được thiết kế để phát hiện lỗi thật, vì vậy một số testcase có thể fail khi API hoặc UI không đáp ứng đúng kỳ vọng.
 
-## Cau truc chinh
+## Cấu trúc kiểm thử
 
-- `src/test/java/f1_api`: API regression test cho cac endpoint Restful-Booker.
-- `src/test/java/perf`: Performance testing bang Karate Gatling Java DSL.
-- `src/test/java/f2_performance`: khu vuc performance legacy, giu lai de tham khao.
-- `src/test/java/f3_ui`: UI testing bang Karate driver cho landing page `3001` va React UI `5173`.
-- `src/test/java/f4_mock`: Mock server va mock API tests cho Restful-Booker.
-- `src/test/java/karate-config.js`: cau hinh moi truong chung.
-- `src/test/java/karate-config-perf.js`: cau hinh rieng cho performance test.
+- `src/test/java/f1_api`: API regression testing.
+- `src/test/java/perf`: performance testing bằng Karate Gatling Java DSL.
+- `src/test/java/f3_ui`: UI testing bằng Karate driver.
+- `src/test/java/f4_mock`: mock server và mock testing.
+- `scripts/run-tests.ps1`: script chạy từng nhóm test hoặc toàn bộ F1-F4.
+
+## Điều kiện trước khi chạy
+
+Cần có:
+
+- Java 21.
+- Maven.
+- Node.js.
+- Chrome nếu chạy F3 UI testing.
+
+Với F1, F2 và F3, cần backend chạy ở `http://localhost:3001`.
+
+Với F3, cần thêm React web chạy ở `http://localhost:5173`.
+
+## Lệnh chạy chuẩn
+
+Từ thư mục này:
+
+```powershell
+cd D:\school\KTDBCLPM\Project\restful-booker\karate-automation\karate\my_project
+```
+
+Chạy từng nhóm:
+
+```powershell
+.\scripts\run-tests.ps1 f1
+.\scripts\run-tests.ps1 f2
+.\scripts\run-tests.ps1 f3
+.\scripts\run-tests.ps1 f4
+```
+
+Chạy toàn bộ:
+
+```powershell
+.\scripts\run-tests.ps1 all
+```
+
+Khi chạy `all`, script không dừng sớm nếu một nhóm fail. Sau khi chạy xong, script sinh báo cáo tổng hợp ở:
+
+```text
+target/reports/summary.html
+target/reports/summary.md
+```
 
 ## F1 API Testing
 
-`f1_api` kiem thu cac nhom API:
+F1 kiểm thử các endpoint Restful-Booker:
 
-- Auth: tao token, boundary input, SQL/NoSQL injection, user enumeration, timing, token randomness va brute force detection.
-- Booking read: lay danh sach booking, filter theo ten/ngay, lay chi tiet booking theo id.
-- Booking write: create, update, patch, delete booking voi token, basic auth, missing auth va invalid data.
-- Ping: kiem tra health endpoint `/ping`.
+- Auth: token, boundary input, SQL/NoSQL injection, user enumeration, timing, randomness và brute force.
+- Booking read: lấy danh sách booking, filter, lấy chi tiết theo id.
+- Booking write: create, update, patch, delete.
+- Ping: kiểm tra `/ping`.
 
-Runner chinh la `f1_api.ApiTest`. Runner nay dung env `api-local`, nen `baseUrl` mac dinh la `http://localhost:3001` va khong goi helper auth khong ton tai.
+Lệnh Maven trực tiếp:
+
+```powershell
+mvn clean test -Dtest=ApiTest
+```
+
+Report:
+
+```text
+target/reports/f1_api/karate-summary.html
+```
 
 ## F2 Performance Testing
 
-Performance test hien tai dung Karate Gatling Java DSL trong package `perf`.
+F2 dùng Gatling để chạy performance test từ Karate feature.
 
-Cac flow chinh:
+Lệnh Maven trực tiếp:
 
-- `booking-list.feature`: list booking IDs duoi tai.
-- `booking-read.feature`: lay booking detail sau khi lay id tu list.
-- `booking-admin-flow.feature`: create, update, patch, delete voi assertion day du.
-- `ping.feature`: kiem tra `/ping` duoi tai nhe.
+```powershell
+mvn clean test-compile gatling:test -Pgatling
+```
 
-Simulation chinh la `perf.RestfulBookerSimulation`, duoc cau hinh trong Maven profile `gatling`.
+Report:
+
+```text
+target/reports/f2_performance
+```
 
 ## F3 UI Testing
 
-`f3_ui` kiem thu hai lop giao dien:
+F3 kiểm thử landing page ở `3001` và React dashboard ở `5173`.
 
-- Landing page goc tai `http://localhost:3001`.
-- React dashboard tai `http://localhost:5173`.
+Lệnh Maven trực tiếp:
 
-Nhom test bao gom:
+```powershell
+mvn clean test -Dtest=UiTest
+```
 
-- Landing page: noi dung, link, anh, nut Sign In va kha nang quay lai sau khi mo link.
-- Auth UI: login dung, login sai, logout va session state.
-- Navigation: sidebar va action cards.
-- Booking read/write UI: filter, get detail, create, update, patch, delete.
-- Ping UI: kiem tra trang thai server.
-- Defect discovery: cac ky vong dung cua san pham de test co the fail khi UI co loi that.
+Report:
+
+```text
+target/reports/f3_ui/karate-summary.html
+```
 
 ## F4 Mock Testing
 
-`f4_mock` cung cap mock server Restful-Booker bang Karate, phuc vu kiem thu doc lap khi khong muon phu thuoc backend that.
+F4 tự khởi động mock server Restful-Booker rồi chạy smoke test trên mock API.
 
-Mock server ho tro:
+Lệnh Maven trực tiếp:
 
-- `GET /ping`
-- `POST /auth`
-- `GET /booking`
-- `GET /booking/{id}`
-- `POST /booking`
-- `PUT /booking/{id}`
-- `PATCH /booking/{id}`
-- `DELETE /booking/{id}`
-- `POST /reset`
-
-Runner chinh la `f4_mock.MockRunner`, tu khoi dong mock server va chay smoke tests tren mock API.
-
-## Report
-
-Karate report sau moi lan chay nam tai:
-
-```text
-target/karate-reports/karate-summary.html
+```powershell
+mvn clean test -Dtest=MockRunner
 ```
 
-Surefire report cua Maven nam tai:
+Report:
 
 ```text
-target/surefire-reports
+target/reports/f4_mock/karate-summary.html
+target/reports/f4_mock/mockserver-summary.html
 ```
 
+## Ghi chú về kết quả fail
+
+Test fail không luôn có nghĩa là bộ test sai. Trong dự án này, test được viết để phát hiện lỗi thật của API hoặc UI. Khi có fail, cần đọc report để phân biệt:
+
+- Fail do lỗi cấu hình môi trường.
+- Fail do backend/frontend chưa chạy.
+- Fail do bug thật trong sản phẩm.
+- Fail do testcase đang kiểm tra một hành vi bảo mật hoặc biên.

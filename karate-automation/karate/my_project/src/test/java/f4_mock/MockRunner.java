@@ -21,6 +21,7 @@ class MockRunner {
             Results results = Runner.path("classpath:f4_mock/restful_booker_mock_test.feature")
                     .karateEnv("mock-test")
                     .systemProperty("mockBaseUrl", "http://localhost:" + server.getPort())
+                    .outputDir("target/reports/f4_mock")
                     .outputHtmlReport(true)
                     .parallel(1);
             createMockServerReport();
@@ -31,14 +32,14 @@ class MockRunner {
     }
 
     private static void createMockServerReport() {
-        Path reportDir = Path.of("target", "karate-reports");
+        Path reportDir = Path.of("target", "reports", "f4_mock");
         Path karateSummary = reportDir.resolve("karate-summary.html");
-        Path mockServerSummary = reportDir.resolve("mockserver-sumary.html");
+        Path mockServerSummary = reportDir.resolve("mockserver-summary.html");
         try {
             Files.copy(karateSummary, mockServerSummary, StandardCopyOption.REPLACE_EXISTING);
             System.out.println("Mock server report: " + mockServerSummary.toAbsolutePath());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create mockserver-sumary.html", e);
+            throw new RuntimeException("Failed to create mockserver-summary.html", e);
         }
     }
 }

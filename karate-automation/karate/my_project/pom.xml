@@ -94,6 +94,7 @@
                         <version>${gatling.plugin.version}</version>
                         <configuration>
                             <simulationClass>perf.RestfulBookerSimulation</simulationClass>
+                            <resultsFolder>${project.build.directory}/reports/f2_performance</resultsFolder>
                         </configuration>
                     </plugin>
                 </plugins>

@@ -10,6 +10,7 @@ class UiTest {
     void testUi() {
         Results results = Runner.path("classpath:f3_ui")
                 .karateEnv("ui")
+                .outputDir("target/reports/f3_ui")
                 .outputHtmlReport(true)
                 .parallel(1);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());

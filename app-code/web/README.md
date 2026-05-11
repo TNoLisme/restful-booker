@@ -1,37 +1,42 @@
-# Restful Booker Web
+# Restful-Booker Web
 
-React/Vite web interface for managing Restful-Booker reservations.
+Đây là giao diện React/Vite dùng cho UI testing bằng Karate.
 
-## Run
+## Chạy web
 
-Start the backend API first:
+Chạy backend trước:
 
-```bash
-cd ../app-code
+```powershell
+cd D:\school\KTDBCLPM\Project\restful-booker\app-code
 npm install
 npm start
 ```
 
-Then start the web app:
+Sau đó chạy frontend:
 
-```bash
+```powershell
+cd D:\school\KTDBCLPM\Project\restful-booker\app-code\web
 npm install
 npm run dev
 ```
 
-Default API base URL is `/api`, proxied by Vite to `http://localhost:3001`. To use another API, create `.env.local`:
+URL mặc định:
 
-```bash
-VITE_API_BASE_URL=http://localhost:3001
+```text
+http://localhost:5173
 ```
 
-## Features
+API mặc định là `/api`, được Vite proxy về:
 
-- Login gate: users enter `admin` / `password123` before entering the dashboard.
-- Dashboard page with navigation cards for each Restful-Booker API capability.
-- Booking list page with filters by first name, last name, checkin, and checkout.
-- Mock dataset with more than 20 bookings for rich UI testing.
-- Booking detail drawer with full update, partial patch, and delete actions after admin login.
-- New booking form using `POST /booking`.
-- Admin login using `POST /auth` with `admin` / `password123`.
-- Health indicator using `GET /ping`.
+```text
+http://localhost:3001
+```
+
+## Chức năng chính
+
+- Đăng nhập admin bằng API `POST /auth`.
+- Dashboard điều hướng tới từng nhóm API.
+- Lọc danh sách booking theo first name, last name, checkin và checkout.
+- Xem chi tiết booking.
+- Tạo, cập nhật toàn bộ, cập nhật một phần và xóa booking.
+- Kiểm tra trạng thái server bằng `GET /ping`.
