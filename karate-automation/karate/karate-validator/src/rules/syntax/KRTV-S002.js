@@ -20,7 +20,7 @@ module.exports = {
           line: scenario.line,
           col: 1,
           message: `${scenario.keyword}: không có tên`,
-          suggestion: `Đặt tên mô tả, ví dụ: ${scenario.keyword}: Login thành công với tài khoản hợp lệ`,
+          suggestion: `Đặt tên mô tả`,
         });
       }
     }
