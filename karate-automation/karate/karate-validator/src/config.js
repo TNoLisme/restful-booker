@@ -8,11 +8,6 @@ const DEFAULT_CONFIG = {
   ignore: [],
 };
 
-/**
- * Load config from YAML file if it exists.
- * Falls back to DEFAULT_CONFIG if not found.
- * NOTE: We parse YAML manually (simple key: value) to avoid extra deps.
- */
 function loadConfig(configPath) {
   const resolved = path.resolve(process.cwd(), configPath || "karate-validator.config.yaml");
 
@@ -24,16 +19,12 @@ function loadConfig(configPath) {
     const raw = fs.readFileSync(resolved, "utf-8");
     return parseSimpleYaml(raw);
   } catch (err) {
-    console.warn(`⚠  Không đọc được config file: ${err.message}. Dùng cấu hình mặc định.`);
+    console.warn(`Không đọc được config file: ${err.message}. Dùng cấu hình mặc định.`);
     return DEFAULT_CONFIG;
   }
 }
 
-/**
- * Very minimal YAML parser for our config format.
- * Supports: string keys, string/array values, nested objects one level deep.
- * For production, replace with 'js-yaml' package.
- */
+
 function parseSimpleYaml(raw) {
   const config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
   const lines = raw.split("\n");

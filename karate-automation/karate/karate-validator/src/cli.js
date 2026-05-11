@@ -23,19 +23,18 @@ program
   .option("--no-color", "Disable colored output")
   .action(async (patterns, options) => {
     if (!patterns || patterns.length === 0) {
-      console.error("❌  Vui lòng cung cấp ít nhất 1 pattern. Ví dụ:");
-      console.error("    karate-validator validate \"./features/**/*.feature\"");
+      console.error("Vui lòng cung cấp ít nhất 1 pattern. Ví dụ:");
+      console.error(" karate-validator validate \"./features/**/*.feature\"");
       process.exit(1);
     }
 
-    // Load config
     const config = loadConfig(options.config);
     const rules = getActiveRules(config);
 
     // Scan files
     const files = scanFiles(patterns);
     if (files.length === 0) {
-      console.warn(`⚠  Không tìm thấy file .feature nào với pattern: ${patterns.join(", ")}`);
+      console.warn(`Không tìm thấy file .feature nào với pattern: ${patterns.join(", ")}`);
       process.exit(0);
     }
 
@@ -82,7 +81,6 @@ program
 
     reporter.report(allResults, { totalFiles: files.length, totalErrors, totalWarns });
 
-    // Exit code 1 nếu có ERROR → CI/CD sẽ fail
     if (totalErrors > 0) process.exit(1);
     else process.exit(0);
   });
