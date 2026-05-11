@@ -10,6 +10,7 @@ class ApiTest {
     void testApi() {
         Results results = Runner.path("classpath:f1_api")
                 .karateEnv("api-local")
+                .outputDir("target/reports/f1_api")
                 .outputHtmlReport(true)
                 .parallel(1);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());

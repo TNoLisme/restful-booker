@@ -34,7 +34,7 @@ if ! curl -fsS http://localhost:3001/ping >/dev/null 2>&1; then
   (cd app-code && npm install && npm start) &
   server_pid=$!
 
-  i=0
+  i=1
   until curl -fsS http://localhost:3001/ping >/dev/null 2>&1
   do
     i=$((i + 1))

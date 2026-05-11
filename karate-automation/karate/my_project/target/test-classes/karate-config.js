@@ -30,6 +30,12 @@ function fn() {
     return config;
   }
 
+  if (env === 'api-local') {
+    config.baseUrl = karate.properties['api.baseUrl'] || config.baseUrl;
+    config.authToken = null;
+    return config;
+  }
+
   if (env === 'perf') {
     config.baseUrl = karate.properties['api.baseUrl'] || config.baseUrl;
     karate.configure('logging', { report: 'warn', console: 'warn' });

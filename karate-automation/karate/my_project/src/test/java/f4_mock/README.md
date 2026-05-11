@@ -1,6 +1,8 @@
 # Restful-Booker Karate Mock Server
 
-Mock server nay bam theo API trong `API.md`:
+Thư mục này chứa mock server Restful-Booker viết bằng Karate. Mock server dùng để kiểm thử độc lập khi không muốn phụ thuộc backend thật.
+
+Mock server bám theo các API chính:
 
 - `GET /ping`
 - `POST /auth`
@@ -11,7 +13,7 @@ Mock server nay bam theo API trong `API.md`:
 - `PATCH /booking/{id}`
 - `DELETE /booking/{id}`
 
-Moi API duoc tach thanh mot handler `.feature` rieng:
+Mỗi API được tách thành một handler `.feature` riêng:
 
 - `ping.feature`
 - `auth.feature`
@@ -23,23 +25,23 @@ Moi API duoc tach thanh mot handler `.feature` rieng:
 - `booking_delete.feature`
 - `reset.feature`
 
-`restful_booker_mock.feature` chi dong vai tro dispatcher, route request den dung handler.
+`restful_booker_mock.feature` đóng vai trò dispatcher, route request đến đúng handler.
 
-## Chay mock server
+## Chạy mock server
 
-Tu thu muc `karate-automation/karate/my_project`:
+Từ thư mục `karate-automation/karate/my_project`:
 
 ```powershell
 mvn test-compile exec:java -Dexec.mainClass=f4_mock.RestfulBookerMockServer
 ```
 
-Mac dinh server chay tai:
+Mặc định server chạy tại:
 
 ```text
 http://localhost:9090
 ```
 
-Co the truyen port khac:
+Có thể truyền port khác:
 
 ```powershell
 mvn test-compile exec:java -Dexec.mainClass=f4_mock.RestfulBookerMockServer -Dexec.args="3001"
@@ -47,21 +49,21 @@ mvn test-compile exec:java -Dexec.mainClass=f4_mock.RestfulBookerMockServer -Dex
 
 ## Auth
 
-`PUT`, `PATCH`, `DELETE` yeu cau mot trong hai cach:
+`PUT`, `PATCH`, `DELETE` yêu cầu một trong hai cách xác thực:
 
-- `Cookie: token=<token>` voi token lay tu `POST /auth`
+- `Cookie: token=<token>` với token lấy từ `POST /auth`
 - `Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=`
 
 ## Test nhanh
 
 ```powershell
-mvn test -Dtest=f4_mock.MockRunner
+mvn clean test -Dtest=MockRunner
 ```
 
-Sau khi test pass, mo report mock server tai:
+Sau khi chạy, mở report mock server tại:
 
 ```text
-target/karate-reports/mockserver-sumary.html
+target/reports/f4_mock/mockserver-summary.html
 ```
 
-Mock co them endpoint tien ich `POST /reset` de dua du lieu test ve trang thai ban dau.
+Mock có thêm endpoint tiện ích `POST /reset` để đưa dữ liệu test về trạng thái ban đầu.
