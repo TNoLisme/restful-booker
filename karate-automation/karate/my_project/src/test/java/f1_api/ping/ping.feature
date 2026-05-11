@@ -1,7 +1,7 @@
 Feature: Ping API
 
   Background:
-    * url 'https://restful-booker.herokuapp.com'
+    * url baseUrl
     * configure headers = { 'Accept': '*/*' }
 
 

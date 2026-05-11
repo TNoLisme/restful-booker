@@ -1,7 +1,7 @@
 Feature: Booking
 
 Background:
-    * def urlBase = 'http://127.0.0.1:3001/booking'
+    * def urlBase = baseUrl + '/booking'
     * configure headers = { 'Accept': '*/*' }
 
 Scenario: GBK-EP-01 - Get booking detail by id

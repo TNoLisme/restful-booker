@@ -1,7 +1,7 @@
 Feature: BookingIds
 
 Background:
-    * def urlBase = 'http://127.0.0.1:3001/booking'
+    * def urlBase = baseUrl + '/booking'
 
 Scenario: GBK-EP-01  get booking ids and validate response
     Given url urlBase

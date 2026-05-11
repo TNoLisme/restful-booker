@@ -1,7 +1,7 @@
 Feature: Partial Update Booking API
 
   Background:
-    * url 'https://restful-booker.herokuapp.com'
+    * url baseUrl
     * configure headers = { 'Accept': '*/*' }
 
     Given path '/auth'

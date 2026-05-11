@@ -22,7 +22,7 @@ Scenario: Try attack by user and password
             let user = u.trim();
             let pass = p.trim();
 
-            let res = karate.http('https://restful-booker.herokuapp.com/auth')
+            let res = karate.http(baseUrl + '/auth')
                 .post({
                     username: user,
                     password: pass
@@ -46,4 +46,5 @@ Scenario: Try attack by user and password
 
     * print 'Security bug result:', securityBug
 
-    * match securityBug == null # gpt đề xuất là != null, cần check
+    # gpt đề xuất là != null, cần check
+    * match securityBug == null

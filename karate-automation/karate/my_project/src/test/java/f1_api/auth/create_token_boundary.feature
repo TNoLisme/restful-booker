@@ -1,7 +1,7 @@
 Feature: Create Token API - boundary
 
 Scenario Outline: <desc>
-  Given url 'https://restful-booker.herokuapp.com/auth'
+  Given url baseUrl + '/auth'
   And request { username: '<user>', password: '<pass>' }
   When method post
   Then match response contains <result>

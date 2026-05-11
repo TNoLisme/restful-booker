@@ -1,7 +1,7 @@
 Feature: Update firstname of booking
 
   Background:
-    * url 'https://restful-booker.herokuapp.com'
+    * url baseUrl
     * configure headers = { 'Accept': '*/*' }
 
     Given path '/auth'
