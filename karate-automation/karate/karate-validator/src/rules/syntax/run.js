@@ -329,53 +329,71 @@ const CHECKS = {
     const targets = ["SCENARIO", "SCENARIO_OUTLINE"];
 
     for (const b of blocks) {
-        if (!targets.includes(b.type)) continue;
+      if (!targets.includes(b.type)) continue;
 
-        let state = "START";
+      // Lọc chỉ lấy các keyword chính, bỏ *, And, But
+      const mainSteps = (b.steps || []).filter(
+        (s) => s.type === "STEP" && ["Given", "When", "Then"].includes(s.keyword)
+      );
 
-        for (const step of (b.steps || [])) {
-        if (step.type !== "STEP") continue;
-
+      // Scan ngược: với mỗi When/Then, tìm anchor hợp lệ phía trên
+      for (let i = 0; i < mainSteps.length; i++) {
+        const step = mainSteps[i];
         const kw = step.keyword;
 
-        // Ignore neutral keywords
-        if (!kw || kw === "*" || kw === "And" || kw === "But") {
-            continue;
+        if (kw === "Given") {
+          // Given không cần điều kiện gì từ phía trên
+          continue;
         }
 
-        const valid =
-            (state === "START" && ["Given", "When", "Then"].includes(kw)) ||
-
-            (state === "GIVEN" &&
-            ["Given", "When", "Then"].includes(kw)) ||
-
-            (state === "WHEN" &&
-            ["When", "Then", "Given"].includes(kw)) ||
-
-            (state === "THEN" &&
-            ["Then", "When", "Given"].includes(kw));
-
-        if (!valid) {
+        if (kw === "When") {
+          // Scan ngược: cần gặp Given trước khi gặp Then hoặc When khác
+          let valid = false;
+          for (let j = i - 1; j >= 0; j--) {
+            const prev = mainSteps[j].keyword;
+            if (prev === "Given") { valid = true; break; }
+            if (prev === "Then" || prev === "When") { valid = false; break; }
+          }
+          if (!valid) {
             errors.push(
-            mkIssue(
+              mkIssue(
                 rule,
                 step.lineNo,
                 1,
-                `Thứ tự keyword sai: '${kw}'`,
-                "Tuân theo flow hợp lệ của Karate"
-            )
+                `'When' không có 'Given' đứng trước`,
+                "When phải đứng sau một Given trong cùng khối"
+              )
             );
-            continue;
+          }
+          continue;
         }
 
-        if (kw === "Given") state = "GIVEN";
-        else if (kw === "When") state = "WHEN";
-        else if (kw === "Then") state = "THEN";
+        if (kw === "Then") {
+          // Scan ngược: cần gặp Given hoặc When trước khi gặp Then khác
+          let valid = false;
+          for (let j = i - 1; j >= 0; j--) {
+            const prev = mainSteps[j].keyword;
+            if (prev === "Given" || prev === "When") { valid = true; break; }
+            if (prev === "Then") { valid = false; break; }
+          }
+          if (!valid) {
+            errors.push(
+              mkIssue(
+                rule,
+                step.lineNo,
+                1,
+                `'Then' không có 'Given' hoặc 'When' đứng trước`,
+                "Then phải đứng sau Given hoặc When trong cùng khối"
+              )
+            );
+          }
+          continue;
         }
+      }
     }
 
     return errors;
-    },
+  },
 
   // ── S-006 ─ And/But không được là step đầu tiên ──────────────────────────
   FIRST_STEP_NOT({ rule, blocks }) {

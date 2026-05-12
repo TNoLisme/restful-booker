@@ -1,11 +1,266 @@
 {
   "summary": {
-    "totalFiles": 39,
-    "totalErrors": 0,
-    "totalWarns": 0,
-    "cleanFiles": 39,
-    "status": "PASSED"
+    "totalFiles": 25,
+    "totalErrors": 17,
+    "totalWarns": 6,
+    "cleanFiles": 11,
+    "status": "FAILED"
   },
-  "generatedAt": "2026-05-11T11:43:15.305Z",
-  "results": []
+  "generatedAt": "2026-05-12T03:07:52.030Z",
+  "results": [
+    {
+      "file": "src\\test\\testset\\invalid\\i01_missing_feature_keyword.feature",
+      "errors": [
+        {
+          "ruleId": "F-001",
+          "severity": "ERROR",
+          "line": 1,
+          "col": 1,
+          "message": "Không tìm thấy 'Feature:' — file phải bắt đầu bằng từ khóa Feature:",
+          "suggestion": "Dòng đầu tiên (không tính comment/blank) phải là: Feature: <mô tả>"
+        },
+        {
+          "ruleId": "F-003",
+          "severity": "ERROR",
+          "line": 1,
+          "col": 1,
+          "message": "'Feature' phải xuất hiện ít nhất 1 lần (hiện tại: 0)",
+          "suggestion": "Thêm ít nhất một khối Feature"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i02_empty_scenario.feature",
+      "errors": [
+        {
+          "ruleId": "S-004",
+          "severity": "ERROR",
+          "line": 3,
+          "col": 1,
+          "message": "'SCENARIO' \"This scenario has no steps\" phải có ít nhất 1 step (hiện tại: 0)",
+          "suggestion": "Thêm ít nhất một step vào Scenario"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i03_then_before_when.feature",
+      "errors": [
+        {
+          "ruleId": "S-005",
+          "severity": "WARN",
+          "line": 7,
+          "col": 1,
+          "message": "'When' không có 'Given' đứng trước",
+          "suggestion": "When phải đứng sau một Given trong cùng khối"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i05_invalid_http_method.feature",
+      "errors": [
+        {
+          "ruleId": "H-002",
+          "severity": "ERROR",
+          "line": 6,
+          "col": 1,
+          "message": "HTTP verb không hợp lệ. Hợp lệ: get, post, put, patch, delete, head, options, connect, trace: \"When method FETCH\"",
+          "suggestion": "Giá trị sau 'method' phải là một trong: get, post, put, patch, delete, head, options, connect, trace."
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i06_outline_missing_examples.feature",
+      "errors": [
+        {
+          "ruleId": "O-001",
+          "severity": "ERROR",
+          "line": 3,
+          "col": 1,
+          "message": "Scenario Outline \"Login as <role>\" không có khối 'Examples:'",
+          "suggestion": "Thêm khối Examples: với header và ít nhất 1 dòng data"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i07_examples_column_mismatch.feature",
+      "errors": [
+        {
+          "ruleId": "O-004",
+          "severity": "ERROR",
+          "line": 3,
+          "col": 1,
+          "message": "Placeholder <username> không có cột tương ứng trong Examples",
+          "suggestion": "Các cột hiện có: role, user, pass — kiểm tra lại tên (case-sensitive)"
+        },
+        {
+          "ruleId": "O-004",
+          "severity": "ERROR",
+          "line": 3,
+          "col": 1,
+          "message": "Placeholder <password> không có cột tương ứng trong Examples",
+          "suggestion": "Các cột hiện có: role, user, pass — kiểm tra lại tên (case-sensitive)"
+        },
+        {
+          "ruleId": "O-004",
+          "severity": "ERROR",
+          "line": 3,
+          "col": 1,
+          "message": "Placeholder <expectedStatus> không có cột tương ứng trong Examples",
+          "suggestion": "Các cột hiện có: role, user, pass — kiểm tra lại tên (case-sensitive)"
+        },
+        {
+          "ruleId": "O-006",
+          "severity": "WARN",
+          "line": 10,
+          "col": 1,
+          "message": "Cột 'user' trong Examples không được dùng trong bất kỳ step nào (dead data)",
+          "suggestion": "Xóa cột 'user' hoặc thêm placeholder <user> vào step tương ứng"
+        },
+        {
+          "ruleId": "O-006",
+          "severity": "WARN",
+          "line": 10,
+          "col": 1,
+          "message": "Cột 'pass' trong Examples không được dùng trong bất kỳ step nào (dead data)",
+          "suggestion": "Xóa cột 'pass' hoặc thêm placeholder <pass> vào step tương ứng"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i08_unclosed_docstring.feature",
+      "errors": [
+        {
+          "ruleId": "D-001",
+          "severity": "ERROR",
+          "line": 7,
+          "col": 1,
+          "message": "Doc String mở tại dòng 7 nhưng không có dòng đóng \"\"\"",
+          "suggestion": "Thêm dòng \"\"\" để đóng Doc String"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i09_bad_tag_format.feature",
+      "errors": [
+        {
+          "ruleId": "F-003",
+          "severity": "ERROR",
+          "line": 4,
+          "col": 1,
+          "message": "'Feature' chỉ được xuất hiện tối đa 1 lần (hiện tại: 2)",
+          "suggestion": "Gộp các khai báo Feature thành một"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i10_duplicate_feature.feature",
+      "errors": [
+        {
+          "ruleId": "F-003",
+          "severity": "ERROR",
+          "line": 8,
+          "col": 1,
+          "message": "'Feature' chỉ được xuất hiện tối đa 1 lần (hiện tại: 2)",
+          "suggestion": "Gộp các khai báo Feature thành một"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i11_orphan_and_step.feature",
+      "errors": [
+        {
+          "ruleId": "S-006",
+          "severity": "WARN",
+          "line": 4,
+          "col": 1,
+          "message": "'And' không được là step đầu tiên trong Scenario",
+          "suggestion": "Thay 'And' bằng Given/When/Then"
+        },
+        {
+          "ruleId": "H-004",
+          "severity": "WARN",
+          "line": 4,
+          "col": 1,
+          "message": "'path' được dùng nhưng chưa có 'url' base nào được set",
+          "suggestion": "Đặt 'url' trong Background hoặc trước bước 'path'"
+        },
+        {
+          "ruleId": "S-005",
+          "severity": "WARN",
+          "line": 6,
+          "col": 1,
+          "message": "'When' không có 'Given' đứng trước",
+          "suggestion": "When phải đứng sau một Given trong cùng khối"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i12_status_non_numeric.feature",
+      "errors": [
+        {
+          "ruleId": "H-003",
+          "severity": "ERROR",
+          "line": 7,
+          "col": 1,
+          "message": "Status code phải là số nguyên 100–599: \"Then status OK\"",
+          "suggestion": "'status' assertion nhận số nguyên HTTP status code hợp lệ."
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i13_empty_file.feature",
+      "errors": [
+        {
+          "ruleId": "F-001",
+          "severity": "ERROR",
+          "line": 1,
+          "col": 1,
+          "message": "Không tìm thấy 'Feature:' — file phải bắt đầu bằng từ khóa Feature:",
+          "suggestion": "Dòng đầu tiên (không tính comment/blank) phải là: Feature: <mô tả>"
+        },
+        {
+          "ruleId": "F-003",
+          "severity": "ERROR",
+          "line": 1,
+          "col": 1,
+          "message": "'Feature' phải xuất hiện ít nhất 1 lần (hiện tại: 0)",
+          "suggestion": "Thêm ít nhất một khối Feature"
+        },
+        {
+          "ruleId": "F-004",
+          "severity": "ERROR",
+          "line": 1,
+          "col": 1,
+          "message": "'Scenario' phải xuất hiện ít nhất 1 lần (hiện tại: 0)",
+          "suggestion": "Thêm ít nhất một khối Scenario"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i14_background_after_scenario.feature",
+      "errors": [
+        {
+          "ruleId": "F-005",
+          "severity": "ERROR",
+          "line": 8,
+          "col": 1,
+          "message": "'Background:' phải đặt trước tất cả Scenario",
+          "suggestion": "Di chuyển khối Background lên trước Scenario đầu tiên"
+        }
+      ]
+    },
+    {
+      "file": "src\\test\\testset\\invalid\\i15_unresolved_placeholder.feature",
+      "errors": [
+        {
+          "ruleId": "O-004",
+          "severity": "ERROR",
+          "line": 3,
+          "col": 1,
+          "message": "Placeholder <undefinedPlaceholder> không có cột tương ứng trong Examples",
+          "suggestion": "Các cột hiện có: username — kiểm tra lại tên (case-sensitive)"
+        }
+      ]
+    }
+  ]
 }
