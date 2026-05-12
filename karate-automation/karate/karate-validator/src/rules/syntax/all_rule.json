@@ -338,7 +338,7 @@
       "check": "REGEX_STEP_PATTERN",
       "params": {
         "triggerPattern": "^\\s*(When|And|\\*)\\s+method\\s+",
-        "validPattern": "^\\s*(When|And|\\*)\\s+method\\s+(get|post|put|patch|delete|head|options|connect|trace)\\s*$",
+        "validPattern": "^\\s*(When|And|\\*)\\s+method\\s+(get|post|put|patch|delete|head|options|connect|trace)\\b",
         "flags": "i",
         "message": "HTTP verb không hợp lệ. Hợp lệ: get, post, put, patch, delete, head, options, connect, trace"
       }

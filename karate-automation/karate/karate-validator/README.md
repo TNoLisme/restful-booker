@@ -53,3 +53,5 @@ TN: 1/11   || FN: 0/15
 
 Đánh giá cụ thể hơn với các cờ EROR và WARN:
 ERROR: TP: 17/17
+
+-> TP đạt 10/11 vì một file có lỗi missing method http không nằm trong bộ rule.
