@@ -1,12 +1,7 @@
 const path = require("path");
+const fs = require("fs");
 
 const SEVERITY_ORDER = { ERROR: 0, WARN: 1, INFO: 2 };
-
-const ICONS = {
-  ERROR: "✖",
-  WARN:  "⚠",
-  INFO:  "ℹ",
-};
 
 // ANSI colors
 const COLOR = {
@@ -38,70 +33,37 @@ class Reporter {
     } else {
       this._reportText(results, { totalFiles, totalErrors, totalWarns });
     }
+    this._saveJsonReport(results, { totalFiles, totalErrors, totalWarns});
   }
 
   _reportText(results, { totalFiles, totalErrors, totalWarns }) {
     const c = this.c.bind(this);
     const divider = "═".repeat(60);
 
+    let filesWithIssues = 0;
+    for (const { errors } of results) {
+      const filtered = errors.filter(
+        e => SEVERITY_ORDER[e.severity] <= this.minSeverity
+      );
+
+      if (filtered.length > 0) {
+        filesWithIssues++;
+      }
+    }
+    const cleanFiles = totalFiles - filesWithIssues;
+
     console.log("\n" + c(COLOR.bold, divider));
     console.log(c(COLOR.bold + COLOR.white, "  KARATE VALIDATOR — Kết quả kiểm tra"));
     console.log(c(COLOR.bold, divider));
 
-    let filesWithIssues = 0;
-
-    for (const { file, errors } of results) {
-      const filtered = errors.filter(e => SEVERITY_ORDER[e.severity] <= this.minSeverity);
-      if (filtered.length === 0) continue;
-
-      filesWithIssues++;
-      const relPath = path.relative(process.cwd(), file);
-      console.log("\n" + c(COLOR.cyan, `📁 ${relPath}`));
-
-      const sorted = [...filtered].sort((a, b) => a.line - b.line);
-      for (const err of sorted) {
-        const icon  = ICONS[err.severity] || "·";
-        const color = err.severity === "ERROR" ? COLOR.red : err.severity === "WARN" ? COLOR.yellow : COLOR.gray;
-
-        console.log(
-          c(color, `  ${icon} [${err.severity}]`) +
-          c(COLOR.gray, ` ${err.ruleId}`) +
-          c(COLOR.bold, ` · Dòng ${err.line}`) +
-          (err.col ? c(COLOR.gray, `:${err.col}`) : "")
-        );
-        console.log(`      ${err.message}`);
-        if (err.suggestion) {
-          console.log(c(COLOR.gray, `      → ${err.suggestion}`));
-        }
-      }
-    }
-
-    // Files with no issues
-    const cleanFiles = totalFiles - filesWithIssues;
-
-    console.log("\n" + c(COLOR.bold, divider));
-
-    const filesSummary = `  Tổng kết: ${totalFiles} file kiểm tra`;
-    console.log(filesSummary);
-
+    console.log(`  Tổng file kiểm tra : ${totalFiles}`);
     if (totalErrors > 0) {
-      console.log(c(COLOR.red,    `             ${totalErrors} ERROR  (bắt buộc sửa)`));
+      console.log(c(COLOR.red, `  ERROR              : ${totalErrors}`));
     }
     if (totalWarns > 0) {
-      console.log(c(COLOR.yellow, `             ${totalWarns} WARN   (nên xem xét)`));
+      console.log(c(COLOR.yellow, `  WARN               : ${totalWarns}`));
     }
-    if (cleanFiles > 0 && (totalErrors > 0 || totalWarns > 0)) {
-      console.log(c(COLOR.green,  `             ${cleanFiles} file không có vấn đề`));
-    }
-
-    if (totalErrors === 0 && totalWarns === 0) {
-      console.log(c(COLOR.green, `  Kết quả:   ✔ PASSED — tất cả file hợp lệ`));
-    } else if (totalErrors > 0) {
-      console.log(c(COLOR.red,   `  Kết quả:   ✖ FAILED`));
-    } else {
-      console.log(c(COLOR.yellow, `  Kết quả:   ⚠ PASSED WITH WARNINGS`));
-    }
-
+    console.log(c(COLOR.green, `  File hợp lệ        : ${cleanFiles}`));
     console.log(c(COLOR.bold, divider) + "\n");
   }
 
@@ -116,6 +78,59 @@ class Reporter {
       })),
     };
     console.log(JSON.stringify(output, null, 2));
+  }
+
+  _saveJsonReport(results, { totalFiles, totalErrors, totalWarns }) {
+    const reportPath = path.resolve(
+      process.cwd(),
+      "src",
+      "report",
+      "karate-validator-report.json"
+    );
+
+    let filesWithIssues = 0;
+
+    const normalizedResults = results
+      .map(({ file, errors }) => {
+        const filtered = errors.filter(
+          e => SEVERITY_ORDER[e.severity] <= this.minSeverity
+        );
+
+        if (filtered.length > 0) {
+          filesWithIssues++;
+        }
+
+        return {
+          file: path.relative(process.cwd(), file),
+          errors: filtered
+        };
+      })
+      .filter(r => r.errors.length > 0);
+
+    const report = {
+      summary: {
+        totalFiles,
+        totalErrors,
+        totalWarns,
+        cleanFiles: totalFiles - filesWithIssues,
+        status:
+          totalErrors > 0
+            ? "FAILED"
+            : totalWarns > 0
+              ? "PASSED_WITH_WARNINGS"
+              : "PASSED"
+      },
+      generatedAt: new Date().toISOString(),
+      results: normalizedResults
+    };
+
+    fs.writeFileSync(
+      reportPath,
+      JSON.stringify(report, null, 2),
+      "utf8"
+    );
+
+    console.log(`JSON report saved: ${reportPath}`);
   }
 }
 

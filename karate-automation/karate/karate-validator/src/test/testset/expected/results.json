@@ -1,0 +1,169 @@
+{
+  "testset_version": "1.0.0",
+  "description": "Expected results for Karate .feature validator evaluation",
+  "valid_files": [
+    {
+      "file": "valid/v01_basic_feature.feature",
+      "expected": "VALID",
+      "category": "basic_structure",
+      "description": "Feature đơn giản với 1 Scenario, đủ Given/When/Then"
+    },
+    {
+      "file": "valid/v02_background_multi_scenario.feature",
+      "expected": "VALID",
+      "category": "background",
+      "description": "Background hợp lệ đứng trước nhiều Scenario"
+    },
+    {
+      "file": "valid/v03_scenario_outline.feature",
+      "expected": "VALID",
+      "category": "scenario_outline",
+      "description": "Scenario Outline có Examples đầy đủ, placeholder khớp columns"
+    },
+    {
+      "file": "valid/v04_tags.feature",
+      "expected": "VALID",
+      "category": "tags",
+      "description": "Tags @tag hợp lệ ở cấp Feature và Scenario"
+    },
+    {
+      "file": "valid/v05_variables_expressions.feature",
+      "expected": "VALID",
+      "category": "variables",
+      "description": "Sử dụng * def, #(var), biểu thức nối chuỗi"
+    },
+    {
+      "file": "valid/v06_docstring.feature",
+      "expected": "VALID",
+      "category": "docstring",
+      "description": "DocString mở và đóng bằng triple-quote đúng chuẩn"
+    },
+    {
+      "file": "valid/v07_data_table.feature",
+      "expected": "VALID",
+      "category": "data_table",
+      "description": "Data table với pipe syntax hợp lệ"
+    },
+    {
+      "file": "valid/v08_call_read.feature",
+      "expected": "VALID",
+      "category": "call_read",
+      "description": "Sử dụng call và read() để tái sử dụng feature"
+    },
+    {
+      "file": "valid/v09_match_schema.feature",
+      "expected": "VALID",
+      "category": "match_assertion",
+      "description": "match với fuzzy schema: #number, #string, #regex, #boolean, #?"
+    },
+    {
+      "file": "valid/v10_configure_print.feature",
+      "expected": "VALID",
+      "category": "configure_print",
+      "description": "configure timeout/ssl và print debug output"
+    }
+  ],
+  "invalid_files": [
+    {
+      "file": "invalid/i01_missing_feature_keyword.feature",
+      "expected": "INVALID",
+      "error_category": "missing_feature_keyword",
+      "expected_error": "File không bắt đầu bằng từ khóa 'Feature:'"
+    },
+    {
+      "file": "invalid/i02_empty_scenario.feature",
+      "expected": "INVALID",
+      "error_category": "empty_scenario_body",
+      "expected_error": "Scenario không có bất kỳ step nào"
+    },
+    {
+      "file": "invalid/i03_then_before_when.feature",
+      "expected": "INVALID",
+      "error_category": "wrong_step_order",
+      "expected_error": "Then xuất hiện trước When trong cùng một Scenario"
+    },
+    {
+      "file": "invalid/i04_missing_method.feature",
+      "expected": "INVALID",
+      "error_category": "missing_http_method",
+      "expected_error": "Scenario có request nhưng thiếu 'When method'"
+    },
+    {
+      "file": "invalid/i05_invalid_http_method.feature",
+      "expected": "INVALID",
+      "error_category": "invalid_http_method",
+      "expected_error": "FETCH không phải HTTP method hợp lệ (GET/POST/PUT/DELETE/PATCH/HEAD/OPTIONS)"
+    },
+    {
+      "file": "invalid/i06_outline_missing_examples.feature",
+      "expected": "INVALID",
+      "error_category": "outline_missing_examples",
+      "expected_error": "Scenario Outline thiếu block Examples"
+    },
+    {
+      "file": "invalid/i07_examples_column_mismatch.feature",
+      "expected": "INVALID",
+      "error_category": "examples_column_mismatch",
+      "expected_error": "Placeholder <username>, <password>, <expectedStatus> không khớp với column trong Examples"
+    },
+    {
+      "file": "invalid/i08_unclosed_docstring.feature",
+      "expected": "INVALID",
+      "error_category": "unclosed_docstring",
+      "expected_error": "DocString mở bằng '\"\"\"' nhưng không có dòng đóng tương ứng"
+    },
+    {
+      "file": "invalid/i09_bad_tag_format.feature",
+      "expected": "INVALID",
+      "error_category": "invalid_tag_format",
+      "expected_error": "Tag không có prefix '@', hoặc xuất hiện sau Feature keyword"
+    },
+    {
+      "file": "invalid/i10_duplicate_feature.feature",
+      "expected": "INVALID",
+      "error_category": "duplicate_feature_keyword",
+      "expected_error": "File chứa nhiều hơn một 'Feature:' keyword"
+    },
+    {
+      "file": "invalid/i11_orphan_and_step.feature",
+      "expected": "INVALID",
+      "error_category": "orphan_conjunction_step",
+      "expected_error": "'And' hoặc 'But' được dùng làm step đầu tiên, không có Given/When/Then đứng trước"
+    },
+    {
+      "file": "invalid/i12_status_non_numeric.feature",
+      "expected": "INVALID",
+      "error_category": "invalid_status_value",
+      "expected_error": "Giá trị sau 'status' phải là số nguyên, không được là chuỗi 'OK'"
+    },
+    {
+      "file": "invalid/i13_empty_file.feature",
+      "expected": "INVALID",
+      "error_category": "empty_file",
+      "expected_error": "File hoàn toàn rỗng, không có nội dung"
+    },
+    {
+      "file": "invalid/i14_background_after_scenario.feature",
+      "expected": "INVALID",
+      "error_category": "background_after_scenario",
+      "expected_error": "Background phải được đặt trước tất cả Scenario, không được đứng sau"
+    },
+    {
+      "file": "invalid/i15_unresolved_placeholder.feature",
+      "expected": "INVALID",
+      "error_category": "unresolved_placeholder",
+      "expected_error": "Placeholder <undefinedPlaceholder> trong step không có column tương ứng trong Examples"
+    }
+  ],
+  "scoring": {
+    "total_valid_files": 10,
+    "total_invalid_files": 15,
+    "total_files": 25,
+    "metrics": {
+      "true_positive": "Invalid file bị đánh dấu INVALID (phát hiện đúng lỗi)",
+      "true_negative": "Valid file được chấp nhận VALID (không false alarm)",
+      "false_positive": "Valid file bị từ chối sai (validator quá nghiêm)",
+      "false_negative": "Invalid file được chấp nhận sai (validator bỏ sót lỗi)"
+    }
+  }
+}

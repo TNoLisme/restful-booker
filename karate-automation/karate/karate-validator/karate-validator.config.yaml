@@ -3,12 +3,10 @@
 version: "1.0"
 
 rules:
-  # Tắt rule không phù hợp với team (bỏ comment dòng tương ứng)
   disable:
     # - KRTV-S002   # Bỏ check tên Scenario
     # - KRTV-C001   # Bỏ check tag bắt buộc
 
-# Bỏ qua các thư mục không cần validate
 ignore:
   # - features/legacy/**
   # - features/wip/**
