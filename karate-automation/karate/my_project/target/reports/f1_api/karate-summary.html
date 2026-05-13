@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="res/bootstrap.min.css"/>
+    <link rel="stylesheet" href="res/karate-report.css"/>
+    <link rel="icon" href="res/favicon.ico"/>
+    <script src="res/alpine.min.js" defer></script>
+    <title>Karate Summary</title>
+    <style>
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { background-color: var(--bs-tertiary-bg); }
+        .tag-chip { font-size: 0.8rem; }
+        .scenario-row { background-color: var(--bs-tertiary-bg); }
+        .expand-btn { width: 24px; text-align: center; }
+        tr.highlight-match > td { background-color: rgba(255, 193, 7, 0.35) !important; }
+        [data-bs-theme="dark"] tr.highlight-match > td { background-color: rgba(255, 193, 7, 0.45) !important; }
+    </style>
+</head>
+<body x-data="KarateReport.summaryData()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="karate-summary.html">
+                <img src="res/karate-logo.svg" alt="Karate" height="32" class="d-inline-block align-middle me-2"/>
+                Summary
+            </a>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="karate-timeline.html">Timeline</a>
+                </li>
+            </ul>
+            <button class="btn btn-sm btn-outline-light ms-2" @click="toggleTheme()" title="Toggle theme">
+                <span x-show="theme === 'light'">&#9790;</span>
+                <span x-show="theme === 'dark'">&#9788;</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-4">
+        <p class="text-muted">
+            <span x-text="data.reportDate">Date</span>
+            <span x-show="data.env" class="ms-2">| env: <span class="badge bg-info" x-text="data.env"></span></span>
+        </p>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div :class="data.summary?.scenario_skipped > 0 ? 'col-md-3 col-xl' : 'col-md-3'">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">Features</h5>
+                        <h2 class="card-text" x-text="data.summary?.feature_count || 0">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div :class="data.summary?.scenario_skipped > 0 ? 'col-md-3 col-xl' : 'col-md-3'">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <h5 class="card-title">Scenarios Passed</h5>
+                        <h2 class="card-text" x-text="data.summary?.scenario_passed || 0">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div :class="data.summary?.scenario_skipped > 0 ? 'col-md-3 col-xl' : 'col-md-3'">
+                <div class="card text-white bg-danger">
+                    <div class="card-body">
+                        <h5 class="card-title">Scenarios Failed</h5>
+                        <h2 class="card-text" x-text="data.summary?.scenario_failed || 0">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-xl" x-show="data.summary?.scenario_skipped > 0">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">Scenarios Skipped</h5>
+                        <h2 class="card-text" x-text="data.summary?.scenario_skipped || 0">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div :class="data.summary?.scenario_skipped > 0 ? 'col-md-3 col-xl' : 'col-md-3'">
+                <div class="card text-white bg-secondary">
+                    <div class="card-body">
+                        <h5 class="card-title">Duration</h5>
+                        <h2 class="card-text"><span x-text="data.summary?.duration_millis || 0">0</span> ms</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tag Filter Chips -->
+        <div class="mb-3" x-show="allTags.length > 0">
+            <span class="fw-bold me-2">Filter by tag:</span>
+            <template x-for="tag in allTags" :key="tag">
+                <button class="btn btn-sm me-1 mb-1 tag-chip"
+                        :class="selectedTags.includes(tag) ? 'btn-info' : 'btn-outline-secondary'"
+                        @click="toggleTag(tag)"
+                        x-text="tag"></button>
+            </template>
+            <button x-show="selectedTags.length > 0"
+                    class="btn btn-sm btn-outline-danger mb-1"
+                    @click="selectedTags = []">Clear</button>
+            <label x-show="selectedTags.length > 0" class="form-check form-check-inline ms-3 mb-1">
+                <input type="checkbox" class="form-check-input" x-model="highlightMode">
+                <span class="form-check-label small">Highlight only</span>
+            </label>
+        </div>
+
+        <h2>Features</h2>
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th class="sortable" @click="sortBy('name')">
+                        Feature
+                        <span x-show="sortField === 'name'" x-text="sortDir === 'asc' ? ' \u2191' : ' \u2193'"></span>
+                    </th>
+                    <th class="sortable" @click="sortBy('scenarioCount')" style="width: 100px;">
+                        Scenarios
+                        <span x-show="sortField === 'scenarioCount'" x-text="sortDir === 'asc' ? ' \u2191' : ' \u2193'"></span>
+                    </th>
+                    <th class="sortable" @click="sortBy('passedCount')" style="width: 80px;">
+                        Passed
+                        <span x-show="sortField === 'passedCount'" x-text="sortDir === 'asc' ? ' \u2191' : ' \u2193'"></span>
+                    </th>
+                    <th class="sortable" @click="sortBy('failedCount')" style="width: 80px;">
+                        Failed
+                        <span x-show="sortField === 'failedCount'" x-text="sortDir === 'asc' ? ' \u2191' : ' \u2193'"></span>
+                    </th>
+                    <th class="sortable" @click="sortBy('passRate')" style="width: 90px;">
+                        Pass %
+                        <span x-show="sortField === 'passRate'" x-text="sortDir === 'asc' ? ' \u2191' : ' \u2193'"></span>
+                    </th>
+                    <th class="sortable" @click="sortBy('durationMillis')" style="width: 120px;">
+                        Duration
+                        <span x-show="sortField === 'durationMillis'" x-text="sortDir === 'asc' ? ' \u2191' : ' \u2193'"></span>
+                    </th>
+                    <th style="width: 80px;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="f in filteredFeatures" :key="f.fileName">
+                    <template x-if="highlightMode || featureMatchesTags(f)">
+                        <tr :class="{ 'highlight-match': selectedTags.length > 0 && highlightMode && featureMatchesTags(f) }">
+                            <td>
+                                <button x-show="selectedTags.length > 0 && f.scenarios?.length > 0"
+                                        class="btn btn-sm btn-link p-0 me-1 expand-btn"
+                                        @click="f.expanded = !f.expanded">
+                                    <span x-text="f.expanded ? '\u25BC' : '\u25B6'"></span>
+                                </button>
+                                <a :href="'feature-html/' + f.fileName + '.html'" x-text="f.name || f.relativePath">Feature</a>
+                                <br/>
+                                <small class="text-muted" x-text="f.relativePath">path</small>
+                                <template x-if="getFeatureTagCounts(f).length > 0">
+                                    <div class="mt-1">
+                                        <template x-for="[tag, count] in getFeatureTagCounts(f)" :key="tag">
+                                            <span class="badge bg-secondary me-1" style="font-size: 0.7rem;"
+                                                  x-text="tag + ' (' + count + ')'"></span>
+                                        </template>
+                                    </div>
+                                </template>
+                            </td>
+                            <td x-text="f.scenarioCount">0</td>
+                            <td x-text="f.passedCount">0</td>
+                            <td x-text="f.failedCount">0</td>
+                            <td x-text="formatPassRate(f.passRate)">&mdash;</td>
+                            <td><span x-text="f.durationMillis">0</span> ms</td>
+                            <td>
+                                <span x-show="f.passed" class="badge bg-success">PASSED</span>
+                                <span x-show="f.failed" class="badge bg-danger">FAILED</span>
+                            </td>
+                        </tr>
+                    </template>
+                </template>
+                <!-- Totals row -->
+                <tr class="table-secondary fw-bold" x-show="(data.features || []).length > 0">
+                    <td>Total (<span x-text="(data.features || []).length"></span> features)</td>
+                    <td x-text="totals.scenarios">0</td>
+                    <td x-text="totals.passed">0</td>
+                    <td x-text="totals.failed">0</td>
+                    <td x-text="formatPassRate(totals.passRate)">&mdash;</td>
+                    <td><span x-text="totals.durationMillis">0</span> ms</td>
+                    <td></td>
+                </tr>
+                <!-- Expanded Scenarios (when filtering by tags) -->
+                <template x-for="f in filteredFeatures" :key="'exp-' + f.fileName">
+                    <template x-if="f.expanded && selectedTags.length > 0">
+                        <template x-for="scenario in getMatchingScenarios(f)" :key="scenario.refId">
+                            <tr class="scenario-row">
+                                <td class="ps-5">
+                                    <small>
+                                        <span class="fw-bold" x-text="scenario.refId"></span>
+                                        <span x-text="scenario.name"></span>
+                                    </small>
+                                </td>
+                                <td colspan="3">
+                                    <template x-for="tag in scenario.tags || []" :key="tag">
+                                        <span class="badge bg-info me-1" x-text="tag"></span>
+                                    </template>
+                                </td>
+                                <td></td>
+                                <td><small x-text="scenario.durationMillis + ' ms'"></small></td>
+                                <td>
+                                    <span x-show="scenario.skipped" class="badge bg-warning">SKIP</span>
+                                    <span x-show="scenario.passed && !scenario.skipped" class="badge bg-success">PASS</span>
+                                    <span x-show="!scenario.passed" class="badge bg-danger">FAIL</span>
+                                </td>
+                            </tr>
+                        </template>
+                    </template>
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <footer class="bg-body-tertiary text-center text-muted py-3 mt-4">
+        <small>Generated by Karate <span x-text="data.karateVersion">2.0</span></small>
+    </footer>
+
+    <script src="res/bootstrap.bundle.min.js"></script>
+    <script src="res/karate-report.js"></script>
+    <script id="karate-data" type="application/json">{
+  "env": "api-local",
+  "reportDate": "2026-05-13 22:18:26",
+  "karateVersion": "2.0.8",
+  "summary": {
+    "feature_count": 15,
+    "feature_passed": 13,
+    "feature_failed": 2,
+    "scenario_count": 52,
+    "scenario_passed": 49,
+    "scenario_failed": 3,
+    "scenario_skipped": 0,
+    "duration_millis": 1512,
+    "status": "failed"
+  },
+  "features": [
+    {
+      "name": "Create Token API - boundary",
+      "relativePath": "target/test-classes/f1_api/auth/create_token_boundary.feature",
+      "fileName": "target.test-classes.f1_api.auth.create_token_boundary",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 401,
+      "scenarioCount": 4,
+      "passedCount": 4,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "TOKEN1",
+          "refId": "[1.1:9]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 296,
+          "tags": null
+        },
+        {
+          "name": "TOKEN2",
+          "refId": "[1.2:9]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 4,
+          "tags": null
+        },
+        {
+          "name": "TOKEN3",
+          "refId": "[1.3:9]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 5,
+          "tags": null
+        },
+        {
+          "name": "TOKEN4",
+          "refId": "[1.4:9]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 5,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "SQL Injection attempt",
+      "relativePath": "target/test-classes/f1_api/auth/security1.feature",
+      "fileName": "target.test-classes.f1_api.auth.security1",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 7,
+      "scenarioCount": 1,
+      "passedCount": 1,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "SQL Injection attempt",
+          "refId": "[1:2]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 5,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "noSQL Injection attempt",
+      "relativePath": "target/test-classes/f1_api/auth/security2.feature",
+      "fileName": "target.test-classes.f1_api.auth.security2",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 13,
+      "scenarioCount": 1,
+      "passedCount": 1,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "NoSQL Injection attempt",
+          "refId": "[1:3]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 10,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "noSQL Injection attempt",
+      "relativePath": "target/test-classes/f1_api/auth/security3.feature",
+      "fileName": "target.test-classes.f1_api.auth.security3",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 7,
+      "scenarioCount": 1,
+      "passedCount": 1,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "NoSQL Injection attempt",
+          "refId": "[1:3]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 7,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "User enumeration",
+      "relativePath": "target/test-classes/f1_api/auth/security4.feature",
+      "fileName": "target.test-classes.f1_api.auth.security4",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 16,
+      "scenarioCount": 2,
+      "passedCount": 2,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "User enumeration check",
+          "refId": "[1:3]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 8,
+          "tags": null
+        },
+        {
+          "name": "Non-existing user",
+          "refId": "[2:9]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 4,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Timing attack check",
+      "relativePath": "target/test-classes/f1_api/auth/security5.feature",
+      "fileName": "target.test-classes.f1_api.auth.security5",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 13,
+      "scenarioCount": 1,
+      "passedCount": 1,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "Timing attack check",
+          "refId": "[1:3]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 11,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Token should be random",
+      "relativePath": "target/test-classes/f1_api/auth/security6.feature",
+      "fileName": "target.test-classes.f1_api.auth.security6",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 0,
+      "scenarioCount": 1,
+      "passedCount": 1,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "Token should be random",
+          "refId": "[1:3]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 0,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Brute Force Security Test",
+      "relativePath": "target/test-classes/f1_api/auth/security7.feature",
+      "fileName": "target.test-classes.f1_api.auth.security7",
+      "passed": false,
+      "failed": true,
+      "durationMillis": 600,
+      "scenarioCount": 1,
+      "passedCount": 0,
+      "failedCount": 1,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "Try attack by user and password",
+          "refId": "[1:3]",
+          "passed": false,
+          "skipped": false,
+          "durationMillis": 597,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Booking",
+      "relativePath": "target/test-classes/f1_api/booking/bookingGet1.feature",
+      "fileName": "target.test-classes.f1_api.booking.bookingget1",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 49,
+      "scenarioCount": 6,
+      "passedCount": 6,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "GBK-EP-01 - Get booking detail by id",
+          "refId": "[1:7]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 13,
+          "tags": null
+        },
+        {
+          "name": "GBK-EP2-02 - Miền dữ liệu không hợp lệ",
+          "refId": "[2:28]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 5,
+          "tags": null
+        },
+        {
+          "name": "GBK-BVA-01- Min+",
+          "refId": "[3:33]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 6,
+          "tags": null
+        },
+        {
+          "name": "GBK-BVA-02- nom",
+          "refId": "[4:53]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 5,
+          "tags": null
+        },
+        {
+          "name": "GBK-BVA-03- Max-",
+          "refId": "[5:73]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 4,
+          "tags": null
+        },
+        {
+          "name": "GBK-BVA-04- Max",
+          "refId": "[6:93]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 7,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "BookingIds",
+      "relativePath": "target/test-classes/f1_api/booking/bookingGet2.feature",
+      "fileName": "target.test-classes.f1_api.booking.bookingget2",
+      "passed": false,
+      "failed": true,
+      "durationMillis": 59,
+      "scenarioCount": 10,
+      "passedCount": 8,
+      "failedCount": 2,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "GBK-EP-01  get booking ids and validate response",
+          "refId": "[1:6]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 8,
+          "tags": null
+        },
+        {
+          "name": "GBK-EP-02 - Filter theo firstname tồn tại",
+          "refId": "[2:15]",
+          "passed": false,
+          "skipped": false,
+          "durationMillis": 5,
+          "tags": null
+        },
+        {
+          "name": "GBK-EP-03 - Filter theo lastname tồn tại",
+          "refId": "[3:23]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 4,
+          "tags": null
+        },
+        {
+          "name": "GBK-EP-04 - Filter kết hợp firstname + lastname",
+          "refId": "[4:31]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 5,
+          "tags": null
+        },
+        {
+          "name": "GBK-EP-05 - Filter không khớp bất kỳ record nào",
+          "refId": "[5:41]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 3,
+          "tags": null
+        },
+        {
+          "name": "GBK-BVA-01 - firstname = chuỗi 1 ký tự",
+          "refId": "[6:50]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 5,
+          "tags": null
+        },
+        {
+          "name": "GBK-BVA-02 - firstname = chuỗi rỗng",
+          "refId": "[7:57]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 3,
+          "tags": null
+        },
+        {
+          "name": "GBK-BVA-03 - checkin ngày hợp lệ đúng format",
+          "refId": "[8:64]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 4,
+          "tags": null
+        },
+        {
+          "name": "GBK-BVA-04 - checkin sai định dạng",
+          "refId": "[9:71]",
+          "passed": false,
+          "skipped": false,
+          "durationMillis": 7,
+          "tags": null
+        },
+        {
+          "name": "GBK-BVA-05 - checkout nhỏ hơn checkin",
+          "refId": "[10:77]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 5,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Create Booking API",
+      "relativePath": "target/test-classes/f1_api/booking/createBooking.feature",
+      "fileName": "target.test-classes.f1_api.booking.createbooking",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 38,
+      "scenarioCount": 5,
+      "passedCount": 5,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "CBK-EP-01 - Đầy đủ field hợp lệ",
+          "refId": "[1:8]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 9,
+          "tags": null
+        },
+        {
+          "name": "CBK-EP-02 - Thiếu firstname",
+          "refId": "[2:47]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 6,
+          "tags": null
+        },
+        {
+          "name": "CBK-EP-03 - Thiếu bookingdates",
+          "refId": "[3:65]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 6,
+          "tags": null
+        },
+        {
+          "name": "CBK-EP-04 - depositpaid = false",
+          "refId": "[4:80]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 8,
+          "tags": null
+        },
+        {
+          "name": "CBK-EP-05 - totalprice sai kiểu dữ liệu",
+          "refId": "[5:101]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 4,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Delete Booking API",
+      "relativePath": "target/test-classes/f1_api/booking/deleteBooking.feature",
+      "fileName": "target.test-classes.f1_api.booking.deletebooking",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 85,
+      "scenarioCount": 5,
+      "passedCount": 5,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "DEL-EP-01 xoá thành công với token hợp lệ",
+          "refId": "[1:22]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 11,
+          "tags": null
+        },
+        {
+          "name": "DEL-EP-02 xoá không hợp lệ: không có token",
+          "refId": "[2:30]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 15,
+          "tags": null
+        },
+        {
+          "name": "DEL-EP-03 xoá không hợp lệ: token sai",
+          "refId": "[3:37]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 15,
+          "tags": null
+        },
+        {
+          "name": "DEL-EP-04 xoá booking đã bị xoá",
+          "refId": "[4:45]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 25,
+          "tags": null
+        },
+        {
+          "name": "DEL-EP-05 xoá booking không tồn tại",
+          "refId": "[5:60]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 10,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Update firstname of booking",
+      "relativePath": "target/test-classes/f1_api/booking/updateBooking.feature",
+      "fileName": "target.test-classes.f1_api.booking.updatebooking",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 90,
+      "scenarioCount": 5,
+      "passedCount": 5,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "UPD-EP-01 cập nhật hợp lệ",
+          "refId": "[1:20]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 21,
+          "tags": null
+        },
+        {
+          "name": "UPD-EP-02 cập nhật không hợp lệ: không có token",
+          "refId": "[2:38]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 16,
+          "tags": null
+        },
+        {
+          "name": "UPD-EP-03 cập nhật không hợp lệ: Token sai",
+          "refId": "[3:52]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 13,
+          "tags": null
+        },
+        {
+          "name": "UPD-EP-04 cập nhật không hợp lệ: Booking không tồn tại",
+          "refId": "[4:66]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 18,
+          "tags": null
+        },
+        {
+          "name": "UPD-EP-05 cập nhật không hợp lệ: Body thiếu",
+          "refId": "[5:80]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 13,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Partial Update Booking API",
+      "relativePath": "target/test-classes/f1_api/booking/updateBooking2.feature",
+      "fileName": "target.test-classes.f1_api.booking.updatebooking2",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 76,
+      "scenarioCount": 7,
+      "passedCount": 7,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "PAT-EP-01 cập nhật 1 field",
+          "refId": "[1:20]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 11,
+          "tags": null
+        },
+        {
+          "name": "PAT-EP-02 cập nhật nhiều field cùng lúc",
+          "refId": "[2:46]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 10,
+          "tags": null
+        },
+        {
+          "name": "PAT-EP-03 cập nhật không hợp lệ: không có token",
+          "refId": "[3:74]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 11,
+          "tags": null
+        },
+        {
+          "name": "PAT-EP-04 field không tồn tại trong schema",
+          "refId": "[4:88]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 9,
+          "tags": null
+        },
+        {
+          "name": "PAT-BVA-01 body rỗng {}",
+          "refId": "[5:107]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 8,
+          "tags": null
+        },
+        {
+          "name": "PAT-BVA-02 firstname là chuỗi rỗng",
+          "refId": "[6:120]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 7,
+          "tags": null
+        },
+        {
+          "name": "PAT-BVA-03 totalprice = 0",
+          "refId": "[7:138]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 12,
+          "tags": null
+        }
+      ]
+    },
+    {
+      "name": "Ping API",
+      "relativePath": "target/test-classes/f1_api/ping/ping.feature",
+      "fileName": "target.test-classes.f1_api.ping.ping",
+      "passed": true,
+      "failed": false,
+      "durationMillis": 21,
+      "scenarioCount": 2,
+      "passedCount": 2,
+      "failedCount": 0,
+      "skippedCount": 0,
+      "scenarios": [
+        {
+          "name": "PNG-EP-01 Health check cơ bản",
+          "refId": "[1:8]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 7,
+          "tags": null
+        },
+        {
+          "name": "PNG-EP-02 Sai HTTP method POST /ping",
+          "refId": "[2:17]",
+          "passed": true,
+          "skipped": false,
+          "durationMillis": 11,
+          "tags": null
+        }
+      ]
+    }
+  ]
+}</script>
+</body>
+</html>

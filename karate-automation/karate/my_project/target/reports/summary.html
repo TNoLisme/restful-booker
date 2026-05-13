@@ -1,0 +1,32 @@
+﻿<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Báo cáo tổng hợp kiểm thử Restful-Booker</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 32px; color: #172033; }
+    h1 { margin-bottom: 8px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 24px; }
+    th, td { border: 1px solid #d5dbe7; padding: 10px 12px; text-align: left; }
+    th { background: #f2f5fa; }
+    .pass { color: #116b37; font-weight: 700; }
+    .fail { color: #b42318; font-weight: 700; }
+    code { background: #f2f5fa; padding: 2px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Báo cáo tổng hợp kiểm thử Restful-Booker</h1>
+  <p>Thời điểm tạo: <code>2026-05-13 22:19:34</code></p>
+  <table>
+    <thead>
+      <tr><th>Nhóm</th><th>Trạng thái</th><th>Exit code</th><th>Report</th><th>Ghi chú</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>F1 API testing</td><td class="fail">FAIL</td><td>1</td><td><a href="f1_api/karate-summary.html">f1_api/karate-summary.html</a></td><td>Kiểm thử API Restful-Booker local.</td></tr>
+      <tr><td>F2 performance testing</td><td class="pass">PASS</td><td>0</td><td><a href="f2_performance/restfulbookersimulation-20260513151831767/index.html">f2_performance/restfulbookersimulation-20260513151831767/index.html</a></td><td>Kiểm thử tải bằng Karate Gatling.</td></tr>
+      <tr><td>F3 UI testing</td><td class="fail">FAIL</td><td>1</td><td><a href="f3_ui/karate-summary.html">f3_ui/karate-summary.html</a></td><td>Kiểm thử giao diện tr&#234;n backend 3001 v&#224; React web 5173.</td></tr>
+      <tr><td>F4 mock testing</td><td class="pass">PASS</td><td>0</td><td><a href="f4_mock/karate-summary.html">f4_mock/karate-summary.html</a></td><td>Kiểm thử mock server Restful-Booker.</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

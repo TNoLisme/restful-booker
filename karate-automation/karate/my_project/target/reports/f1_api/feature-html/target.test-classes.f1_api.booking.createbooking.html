@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="../res/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../res/karate-report.css"/>
+    <link rel="icon" href="../res/favicon.ico"/>
+    <script src="../res/alpine.min.js" defer></script>
+    <title>Karate Feature</title>
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            width: 220px;
+            overflow-y: auto;
+            border-right: 1px solid var(--bs-border-color);
+        }
+        .main-content {
+            margin-left: 220px;
+            padding: 1rem;
+        }
+        .step-row {
+            border-bottom: 1px solid var(--bs-border-color);
+            padding: 0.25rem 0;
+            font-family: var(--bs-font-monospace);
+            font-size: 0.875rem;
+        }
+        .step-row:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+        .step-row.clickable {
+            cursor: pointer;
+        }
+        .step-logs {
+            background-color: var(--bs-dark-bg-subtle);
+            border-radius: 0.25rem;
+            margin: 0.25rem 0 0.25rem 50px;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .nav-scenario {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-left: 3px solid transparent;
+        }
+        .nav-scenario:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+        .nav-scenario.active {
+            border-left-color: var(--bs-primary);
+            background-color: var(--bs-tertiary-bg);
+        }
+        .log-indicator {
+            font-size: 0.6rem;
+            vertical-align: middle;
+        }
+        .nested-call {
+            border-left: 3px solid var(--bs-info);
+            margin: 0.5rem 0 0.5rem 50px;
+            padding-left: 0.5rem;
+            background-color: var(--bs-tertiary-bg);
+        }
+        .nested-scenario {
+            border-radius: 0.25rem;
+            margin: 0.25rem 0;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .nested-scenario .nested-step {
+            font-family: var(--bs-font-monospace);
+            font-size: 0.8rem;
+            padding: 0.125rem 0;
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body x-data="KarateReport.featureData()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../karate-summary.html">
+                <img src="../res/karate-logo.svg" alt="Karate" height="32" class="d-inline-block align-middle me-2"/>
+                <span x-text="featureSimpleName">Feature</span>
+            </a>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../karate-summary.html">Summary</a>
+                </li>
+            </ul>
+            <button class="btn btn-sm btn-outline-light ms-2" @click="toggleTheme()" title="Toggle theme">
+                <span x-show="theme === 'light'">&#9790;</span>
+                <span x-show="theme === 'dark'">&#9788;</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Left Sidebar -->
+    <nav class="sidebar bg-body-tertiary pt-3">
+        <div class="px-3 mb-2">
+            <small class="text-muted">Scenarios</small>
+        </div>
+        <template x-for="scenario in data.scenarios" :key="scenario.refId">
+            <a class="nav-scenario d-block text-decoration-none"
+               :class="scenario.skipped ? 'text-warning' : (scenario.passed ? 'text-success' : 'text-danger')"
+               :href="'#' + scenario.refId"
+               :title="scenario.name">
+                <span class="fw-bold" x-text="scenario.refId"></span>
+                <span x-text="scenario.name ? ' ' + truncate(scenario.name, 20) : ''"></span>
+            </a>
+        </template>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" style="margin-top: 56px;">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="../karate-summary.html">Summary</a></li>
+                <li class="breadcrumb-item active" aria-current="page" x-text="data.name || data.path">Feature</li>
+            </ol>
+        </nav>
+
+        <h4 x-text="data.name || 'Feature'">Feature Name</h4>
+        <p class="text-muted small" x-text="data.path">path/to/feature</p>
+
+        <!-- Scenarios -->
+        <template x-for="scenario in data.scenarios" :key="scenario.refId">
+            <div class="card mb-3" :id="scenario.refId">
+                <div class="card-header d-flex justify-content-between align-items-center py-2"
+                     :class="scenario.skipped ? 'bg-warning-subtle' : (scenario.passed ? 'bg-success-subtle' : 'bg-danger-subtle')">
+                    <span>
+                        <span class="fw-bold" x-text="scenario.refId"></span>
+                        <span x-text="scenario.name"></span>
+                        <template x-if="scenario.isOutlineExample">
+                            <span class="badge bg-info ms-1">Outline</span>
+                        </template>
+                        <template x-for="tag in scenario.tags || []" :key="tag">
+                            <span class="badge bg-secondary ms-1" x-text="tag"></span>
+                        </template>
+                    </span>
+                    <span>
+                        <small class="text-muted me-2" x-text="scenario.durationMillis + ' ms'"></small>
+                        <span x-show="scenario.skipped" class="badge bg-warning">SKIP</span>
+                        <span x-show="scenario.passed && !scenario.skipped" class="badge bg-success">PASS</span>
+                        <span x-show="!scenario.passed" class="badge bg-danger">FAIL</span>
+                    </span>
+                </div>
+                <div class="card-body p-0" x-html="renderSteps(scenario.steps)">
+                </div>
+                <!-- Scenario Error -->
+                <template x-if="scenario.error && !scenario.steps?.some(s => s.error)">
+                    <div class="card-footer bg-danger-subtle">
+                        <pre class="mb-0 small text-danger" x-text="scenario.error"></pre>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </main>
+
+    <script src="../res/bootstrap.bundle.min.js"></script>
+    <script src="../res/karate-report.js"></script>
+    <script id="karate-data" type="application/json">{
+  "path": "target/test-classes/f1_api/booking/createBooking.feature",
+  "name": "Create Booking API",
+  "relativePath": "target/test-classes/f1_api/booking/createBooking.feature",
+  "passed": true,
+  "durationMillis": 38,
+  "scenarios": [
+    {
+      "name": "CBK-EP-01 - Đầy đủ field hợp lệ",
+      "line": 8,
+      "passed": true,
+      "durationMillis": 9,
+      "startTime": 1778685507442,
+      "endTime": 1778685507451,
+      "refId": "[1:8]",
+      "sectionIndex": 1,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = baseUrl + '/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase",
+          "line": 9,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 10,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 24,
+          "status": "passed",
+          "durationMillis": 7,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/booking\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 168\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Jim\",\n  \"lastname\": \"Brown\",\n  \"totalprice\": 150,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2025-06-01\",\n    \"checkout\": \"2025-06-05\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 4\n1 < 200 POST http://localhost:3001/booking\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"c3-5SVhrTNX9xbNWvPOHMZ3jYbCVBs\"\n1 < Connection: keep-alive\n1 < Content-Length: 195\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"bookingid\": 21,\n  \"booking\": {\n    \"firstname\": \"Jim\",\n    \"lastname\": \"Brown\",\n    \"totalprice\": 150,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n      \"checkin\": \"2025-06-01\",\n      \"checkout\": \"2025-06-05\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:3001/booking\n200 (4 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 25,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response ==",
+          "line": 27,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "CBK-EP-02 - Thiếu firstname",
+      "line": 47,
+      "passed": true,
+      "durationMillis": 6,
+      "startTime": 1778685507452,
+      "endTime": 1778685507458,
+      "refId": "[2:47]",
+      "sectionIndex": 2,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = baseUrl + '/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase",
+          "line": 48,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 49,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 61,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/booking\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 120\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"lastname\": \"Brown\",\n  \"totalprice\": 150,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2025-06-01\",\n    \"checkout\": \"2025-06-05\"\n  }\n}\n\nresponse time in milliseconds: 2\n1 < 500 POST http://localhost:3001/booking\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"15-/6VXivhc2MKdLfIkLcUE47K6aH0\"\n1 < Connection: keep-alive\n1 < Content-Length: 21\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: text/plain; charset=utf-8\nInternal Server Error\n\nPOST http://localhost:3001/booking\n500 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "assert",
+          "text": "responseStatus == 400 || responseStatus == 500",
+          "line": 63,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "CBK-EP-03 - Thiếu bookingdates",
+      "line": 65,
+      "passed": true,
+      "durationMillis": 6,
+      "startTime": 1778685507459,
+      "endTime": 1778685507465,
+      "refId": "[3:65]",
+      "sectionIndex": 3,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = baseUrl + '/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase",
+          "line": 66,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 67,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 76,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/booking\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 74\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Jim\",\n  \"lastname\": \"Brown\",\n  \"totalprice\": 150,\n  \"depositpaid\": true\n}\n\nresponse time in milliseconds: 2\n1 < 500 POST http://localhost:3001/booking\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"15-/6VXivhc2MKdLfIkLcUE47K6aH0\"\n1 < Connection: keep-alive\n1 < Content-Length: 21\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: text/plain; charset=utf-8\nInternal Server Error\n\nPOST http://localhost:3001/booking\n500 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "assert",
+          "text": "responseStatus == 400 || responseStatus == 500",
+          "line": 78,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "CBK-EP-04 - depositpaid = false",
+      "line": 80,
+      "passed": true,
+      "durationMillis": 8,
+      "startTime": 1778685507466,
+      "endTime": 1778685507474,
+      "refId": "[4:80]",
+      "sectionIndex": 4,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = baseUrl + '/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase",
+          "line": 81,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 82,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 96,
+          "status": "passed",
+          "durationMillis": 6,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/booking\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 169\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Jim\",\n  \"lastname\": \"Brown\",\n  \"totalprice\": 150,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2025-06-01\",\n    \"checkout\": \"2025-06-05\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 2\n1 < 200 POST http://localhost:3001/booking\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"c4-nQ7Bygbae56d5A5+luUm//f0DQQ\"\n1 < Connection: keep-alive\n1 < Content-Length: 196\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"bookingid\": 22,\n  \"booking\": {\n    \"firstname\": \"Jim\",\n    \"lastname\": \"Brown\",\n    \"totalprice\": 150,\n    \"depositpaid\": false,\n    \"bookingdates\": {\n      \"checkin\": \"2025-06-01\",\n      \"checkout\": \"2025-06-05\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:3001/booking\n200 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 97,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.booking.depositpaid == false",
+          "line": 99,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "CBK-EP-05 - totalprice sai kiểu dữ liệu",
+      "line": 101,
+      "passed": true,
+      "durationMillis": 4,
+      "startTime": 1778685507475,
+      "endTime": 1778685507479,
+      "refId": "[5:101]",
+      "sectionIndex": 5,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "urlBase = baseUrl + '/booking'",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "url",
+          "text": "urlBase",
+          "line": 102,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 103,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 117,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/booking\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 177\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Jim\",\n  \"lastname\": \"Brown\",\n  \"totalprice\": \"onehundred\",\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2025-06-01\",\n    \"checkout\": \"2025-06-05\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 1\n1 < 200 POST http://localhost:3001/booking\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"c4-I7JUNLikX0srUCCRdae42hOm1Yg\"\n1 < Connection: keep-alive\n1 < Content-Length: 196\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"bookingid\": 23,\n  \"booking\": {\n    \"firstname\": \"Jim\",\n    \"lastname\": \"Brown\",\n    \"totalprice\": null,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n      \"checkin\": \"2025-06-01\",\n      \"checkout\": \"2025-06-05\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:3001/booking\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "assert",
+          "text": "responseStatus == 200 || responseStatus == 400 || responseStatus == 500",
+          "line": 119,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    }
+  ]
+}</script>
+</body>
+</html>

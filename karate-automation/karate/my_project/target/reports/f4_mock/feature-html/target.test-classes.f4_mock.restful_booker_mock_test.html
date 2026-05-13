@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="../res/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../res/karate-report.css"/>
+    <link rel="icon" href="../res/favicon.ico"/>
+    <script src="../res/alpine.min.js" defer></script>
+    <title>Karate Feature</title>
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            width: 220px;
+            overflow-y: auto;
+            border-right: 1px solid var(--bs-border-color);
+        }
+        .main-content {
+            margin-left: 220px;
+            padding: 1rem;
+        }
+        .step-row {
+            border-bottom: 1px solid var(--bs-border-color);
+            padding: 0.25rem 0;
+            font-family: var(--bs-font-monospace);
+            font-size: 0.875rem;
+        }
+        .step-row:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+        .step-row.clickable {
+            cursor: pointer;
+        }
+        .step-logs {
+            background-color: var(--bs-dark-bg-subtle);
+            border-radius: 0.25rem;
+            margin: 0.25rem 0 0.25rem 50px;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .nav-scenario {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-left: 3px solid transparent;
+        }
+        .nav-scenario:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+        .nav-scenario.active {
+            border-left-color: var(--bs-primary);
+            background-color: var(--bs-tertiary-bg);
+        }
+        .log-indicator {
+            font-size: 0.6rem;
+            vertical-align: middle;
+        }
+        .nested-call {
+            border-left: 3px solid var(--bs-info);
+            margin: 0.5rem 0 0.5rem 50px;
+            padding-left: 0.5rem;
+            background-color: var(--bs-tertiary-bg);
+        }
+        .nested-scenario {
+            border-radius: 0.25rem;
+            margin: 0.25rem 0;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .nested-scenario .nested-step {
+            font-family: var(--bs-font-monospace);
+            font-size: 0.8rem;
+            padding: 0.125rem 0;
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body x-data="KarateReport.featureData()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../karate-summary.html">
+                <img src="../res/karate-logo.svg" alt="Karate" height="32" class="d-inline-block align-middle me-2"/>
+                <span x-text="featureSimpleName">Feature</span>
+            </a>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../karate-summary.html">Summary</a>
+                </li>
+            </ul>
+            <button class="btn btn-sm btn-outline-light ms-2" @click="toggleTheme()" title="Toggle theme">
+                <span x-show="theme === 'light'">&#9790;</span>
+                <span x-show="theme === 'dark'">&#9788;</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Left Sidebar -->
+    <nav class="sidebar bg-body-tertiary pt-3">
+        <div class="px-3 mb-2">
+            <small class="text-muted">Scenarios</small>
+        </div>
+        <template x-for="scenario in data.scenarios" :key="scenario.refId">
+            <a class="nav-scenario d-block text-decoration-none"
+               :class="scenario.skipped ? 'text-warning' : (scenario.passed ? 'text-success' : 'text-danger')"
+               :href="'#' + scenario.refId"
+               :title="scenario.name">
+                <span class="fw-bold" x-text="scenario.refId"></span>
+                <span x-text="scenario.name ? ' ' + truncate(scenario.name, 20) : ''"></span>
+            </a>
+        </template>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" style="margin-top: 56px;">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="../karate-summary.html">Summary</a></li>
+                <li class="breadcrumb-item active" aria-current="page" x-text="data.name || data.path">Feature</li>
+            </ol>
+        </nav>
+
+        <h4 x-text="data.name || 'Feature'">Feature Name</h4>
+        <p class="text-muted small" x-text="data.path">path/to/feature</p>
+
+        <!-- Scenarios -->
+        <template x-for="scenario in data.scenarios" :key="scenario.refId">
+            <div class="card mb-3" :id="scenario.refId">
+                <div class="card-header d-flex justify-content-between align-items-center py-2"
+                     :class="scenario.skipped ? 'bg-warning-subtle' : (scenario.passed ? 'bg-success-subtle' : 'bg-danger-subtle')">
+                    <span>
+                        <span class="fw-bold" x-text="scenario.refId"></span>
+                        <span x-text="scenario.name"></span>
+                        <template x-if="scenario.isOutlineExample">
+                            <span class="badge bg-info ms-1">Outline</span>
+                        </template>
+                        <template x-for="tag in scenario.tags || []" :key="tag">
+                            <span class="badge bg-secondary ms-1" x-text="tag"></span>
+                        </template>
+                    </span>
+                    <span>
+                        <small class="text-muted me-2" x-text="scenario.durationMillis + ' ms'"></small>
+                        <span x-show="scenario.skipped" class="badge bg-warning">SKIP</span>
+                        <span x-show="scenario.passed && !scenario.skipped" class="badge bg-success">PASS</span>
+                        <span x-show="!scenario.passed" class="badge bg-danger">FAIL</span>
+                    </span>
+                </div>
+                <div class="card-body p-0" x-html="renderSteps(scenario.steps)">
+                </div>
+                <!-- Scenario Error -->
+                <template x-if="scenario.error && !scenario.steps?.some(s => s.error)">
+                    <div class="card-footer bg-danger-subtle">
+                        <pre class="mb-0 small text-danger" x-text="scenario.error"></pre>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </main>
+
+    <script src="../res/bootstrap.bundle.min.js"></script>
+    <script src="../res/karate-report.js"></script>
+    <script id="karate-data" type="application/json">{
+  "path": "target/test-classes/f4_mock/restful_booker_mock_test.feature",
+  "name": "Restful-Booker mock server smoke tests",
+  "relativePath": "target/test-classes/f4_mock/restful_booker_mock_test.feature",
+  "passed": true,
+  "durationMillis": 453,
+  "scenarios": [
+    {
+      "name": "GET /ping returns 201",
+      "line": 6,
+      "passed": true,
+      "durationMillis": 285,
+      "startTime": 1778685571360,
+      "endTime": 1778685571645,
+      "refId": "[1:6]",
+      "sectionIndex": 1,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "karate.properties['mockBaseUrl']",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'ping'",
+          "line": 7,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 8,
+          "status": "passed",
+          "durationMillis": 282,
+          "hasLogs": true,
+          "logs": "request:\n1 > GET http://localhost:61772/ping\n1 > Host: localhost:61772\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 118\n1 < 201 GET http://localhost:61772/ping\n1 < content-length: 0\n1 < Access-Control-Allow-Origin: *\n1 < Content-Type: application/json\n\n\nGET http://localhost:61772/ping\n201 (118 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "201",
+          "line": 9,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "POST /reset restores initial mock data",
+      "line": 11,
+      "passed": true,
+      "durationMillis": 20,
+      "startTime": 1778685571646,
+      "endTime": 1778685571666,
+      "refId": "[2:11]",
+      "sectionIndex": 2,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "karate.properties['mockBaseUrl']",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'reset'",
+          "line": 12,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 13,
+          "status": "passed",
+          "durationMillis": 10,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:61772/reset\n1 > Host: localhost:61772\n1 > Content-Length: 0\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 8\n1 < 200 POST http://localhost:61772/reset\n1 < content-length: 35\n1 < Access-Control-Allow-Origin: *\n1 < Content-Type: application/json\n{\n  \"message\": \"Data reset successful\"\n}\n\nPOST http://localhost:61772/reset\n200 (8 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 14,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response == { message: 'Data reset successful' }",
+          "line": 15,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking'",
+          "line": 17,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 18,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": true,
+          "logs": "request:\n2 > GET http://localhost:61772/booking\n2 > Host: localhost:61772\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 4\n2 < 200 GET http://localhost:61772/booking\n2 < content-length: 81\n2 < Access-Control-Allow-Origin: *\n2 < Content-Type: application/json\n[\n  {\n    \"bookingid\": 1\n  },\n  {\n    \"bookingid\": 2\n  },\n  {\n    \"bookingid\": 3\n  },\n  {\n    \"bookingid\": 4\n  },\n  {\n    \"bookingid\": 5\n  }\n]\n\nGET http://localhost:61772/booking\n200 (4 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 19,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response == '#[5]'",
+          "line": 20,
+          "status": "passed",
+          "durationMillis": 1,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "POST /auth returns token for valid credentials",
+      "line": 22,
+      "passed": true,
+      "durationMillis": 12,
+      "startTime": 1778685571668,
+      "endTime": 1778685571680,
+      "refId": "[3:22]",
+      "sectionIndex": 3,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "karate.properties['mockBaseUrl']",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'auth'",
+          "line": 23,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "{ username: 'admin', password: 'password123' }",
+          "line": 24,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 25,
+          "status": "passed",
+          "durationMillis": 11,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:61772/auth\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:61772\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 5\n1 < 200 POST http://localhost:61772/auth\n1 < content-length: 27\n1 < Access-Control-Allow-Origin: *\n1 < Content-Type: application/json\n{\n  \"token\": \"ad50ddf090ec4c0\"\n}\n\nPOST http://localhost:61772/auth\n200 (5 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 26,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response == { token: '#string' }",
+          "line": 27,
+          "status": "passed",
+          "durationMillis": 1,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "POST /auth returns bad credentials for invalid login",
+      "line": 29,
+      "passed": true,
+      "durationMillis": 5,
+      "startTime": 1778685571681,
+      "endTime": 1778685571686,
+      "refId": "[4:29]",
+      "sectionIndex": 4,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "karate.properties['mockBaseUrl']",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'auth'",
+          "line": 30,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "{ username: 'admin', password: 'wrong' }",
+          "line": 31,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 32,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:61772/auth\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:61772\n1 > Content-Length: 39\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"wrong\"\n}\n\nresponse time in milliseconds: 2\n1 < 200 POST http://localhost:61772/auth\n1 < content-length: 28\n1 < Access-Control-Allow-Origin: *\n1 < Content-Type: application/json\n{\n  \"reason\": \"Bad credentials\"\n}\n\nPOST http://localhost:61772/auth\n200 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 33,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response == { reason: 'Bad credentials' }",
+          "line": 34,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "GET /booking lists and filters booking IDs",
+      "line": 36,
+      "passed": true,
+      "durationMillis": 16,
+      "startTime": 1778685571686,
+      "endTime": 1778685571702,
+      "refId": "[5:36]",
+      "sectionIndex": 5,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "karate.properties['mockBaseUrl']",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'reset'",
+          "line": 37,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 38,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:61772/reset\n1 > Host: localhost:61772\n1 > Content-Length: 0\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 3\n1 < 200 POST http://localhost:61772/reset\n1 < content-length: 35\n1 < Access-Control-Allow-Origin: *\n1 < Content-Type: application/json\n{\n  \"message\": \"Data reset successful\"\n}\n\nPOST http://localhost:61772/reset\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 39,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking'",
+          "line": 41,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 42,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": true,
+          "logs": "request:\n2 > GET http://localhost:61772/booking\n2 > Host: localhost:61772\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 2\n2 < 200 GET http://localhost:61772/booking\n2 < content-length: 81\n2 < Access-Control-Allow-Origin: *\n2 < Content-Type: application/json\n[\n  {\n    \"bookingid\": 1\n  },\n  {\n    \"bookingid\": 2\n  },\n  {\n    \"bookingid\": 3\n  },\n  {\n    \"bookingid\": 4\n  },\n  {\n    \"bookingid\": 5\n  }\n]\n\nGET http://localhost:61772/booking\n200 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 43,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response == '#[5]'",
+          "line": 44,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "each response == { bookingid: '#number' }",
+          "line": 45,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking'",
+          "line": 47,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "param",
+          "text": "firstname = 'Sally'",
+          "line": 48,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "param",
+          "text": "lastname = 'Brown'",
+          "line": 49,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 50,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": true,
+          "logs": "request:\n3 > GET http://localhost:61772/booking?firstname=Sally&lastname=Brown\n3 > Host: localhost:61772\n3 > Connection: keep-alive\n3 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 2\n3 < 200 GET http://localhost:61772/booking?firstname=Sally&lastname=Brown\n3 < content-length: 17\n3 < Access-Control-Allow-Origin: *\n3 < Content-Type: application/json\n[\n  {\n    \"bookingid\": 1\n  }\n]\n\nGET http://localhost:61772/booking?firstname=Sally&lastname=Brown\n200 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 51,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response == [ { bookingid: 1 } ]",
+          "line": 52,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "GET /booking/{id} returns booking detail and 404",
+      "line": 54,
+      "passed": true,
+      "durationMillis": 17,
+      "startTime": 1778685571704,
+      "endTime": 1778685571721,
+      "refId": "[6:54]",
+      "sectionIndex": 6,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "karate.properties['mockBaseUrl']",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'reset'",
+          "line": 55,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 56,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:61772/reset\n1 > Host: localhost:61772\n1 > Content-Length: 0\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 0\n1 < 200 POST http://localhost:61772/reset\n1 < content-length: 35\n1 < Access-Control-Allow-Origin: *\n1 < Content-Type: application/json\n{\n  \"message\": \"Data reset successful\"\n}\n\nPOST http://localhost:61772/reset\n200 (0 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 57,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking', 1",
+          "line": 59,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 60,
+          "status": "passed",
+          "durationMillis": 6,
+          "hasLogs": true,
+          "logs": "request:\n2 > GET http://localhost:61772/booking/1\n2 > Host: localhost:61772\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 3\n2 < 200 GET http://localhost:61772/booking/1\n2 < content-length: 170\n2 < Access-Control-Allow-Origin: *\n2 < Content-Type: application/json\n{\n  \"firstname\": \"Sally\",\n  \"lastname\": \"Brown\",\n  \"totalprice\": 111,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2013-02-23\",\n    \"checkout\": \"2014-10-23\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nGET http://localhost:61772/booking/1\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 61,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response ==",
+          "line": 62,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking', 999999",
+          "line": 74,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 75,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n3 > GET http://localhost:61772/booking/999999\n3 > Host: localhost:61772\n3 > Connection: keep-alive\n3 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 0\n3 < 404 GET http://localhost:61772/booking/999999\n3 < content-length: 21\n3 < Access-Control-Allow-Origin: *\n3 < Content-Type: application/json\n{\n  \"error\": \"Not Found\"\n}\n\nGET http://localhost:61772/booking/999999\n404 (0 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "404",
+          "line": 76,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "POST /booking creates a booking",
+      "line": 78,
+      "passed": true,
+      "durationMillis": 12,
+      "startTime": 1778685571724,
+      "endTime": 1778685571736,
+      "refId": "[7:78]",
+      "sectionIndex": 7,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "karate.properties['mockBaseUrl']",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "payload =",
+          "line": 79,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking'",
+          "line": 90,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "payload",
+          "line": 91,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 92,
+          "status": "passed",
+          "durationMillis": 7,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:61772/booking\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:61772\n1 > Content-Length: 168\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Jim\",\n  \"lastname\": \"Brown\",\n  \"totalprice\": 111,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2018-01-01\",\n    \"checkout\": \"2019-01-01\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 6\n1 < 200 POST http://localhost:61772/booking\n1 < content-length: 194\n1 < Access-Control-Allow-Origin: *\n1 < Content-Type: application/json\n{\n  \"bookingid\": 6,\n  \"booking\": {\n    \"firstname\": \"Jim\",\n    \"lastname\": \"Brown\",\n    \"totalprice\": 111,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n      \"checkin\": \"2018-01-01\",\n      \"checkout\": \"2019-01-01\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:61772/booking\n200 (6 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 93,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response == { bookingid: '#number', booking: '#(payload)' }",
+          "line": 94,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking', response.bookingid",
+          "line": 96,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 97,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": true,
+          "logs": "request:\n2 > GET http://localhost:61772/booking/6\n2 > Host: localhost:61772\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 3\n2 < 200 GET http://localhost:61772/booking/6\n2 < content-length: 168\n2 < Access-Control-Allow-Origin: *\n2 < Content-Type: application/json\n{\n  \"firstname\": \"Jim\",\n  \"lastname\": \"Brown\",\n  \"totalprice\": 111,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2018-01-01\",\n    \"checkout\": \"2019-01-01\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nGET http://localhost:61772/booking/6\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 98,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response == payload",
+          "line": 99,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "PUT /booking/{id} requires auth and replaces booking",
+      "line": 101,
+      "passed": true,
+      "durationMillis": 36,
+      "startTime": 1778685571736,
+      "endTime": 1778685571772,
+      "refId": "[8:101]",
+      "sectionIndex": 8,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "karate.properties['mockBaseUrl']",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "payload =",
+          "line": 102,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "updated =",
+          "line": 113,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'auth'",
+          "line": 124,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "{ username: 'admin', password: 'password123' }",
+          "line": 125,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 126,
+          "status": "passed",
+          "durationMillis": 6,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:61772/auth\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:61772\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 5\n1 < 200 POST http://localhost:61772/auth\n1 < content-length: 27\n1 < Access-Control-Allow-Origin: *\n1 < Content-Type: application/json\n{\n  \"token\": \"3031957ca59d4ce\"\n}\n\nPOST http://localhost:61772/auth\n200 (5 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 127,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 128,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking'",
+          "line": 130,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "payload",
+          "line": 131,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 132,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": true,
+          "logs": "request:\n2 > POST http://localhost:61772/booking\n2 > Content-Type: application/json\n2 > Host: localhost:61772\n2 > Content-Length: 169\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Put\",\n  \"lastname\": \"Before\",\n  \"totalprice\": 100,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2018-01-01\",\n    \"checkout\": \"2019-01-01\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 3\n2 < 200 POST http://localhost:61772/booking\n2 < content-length: 195\n2 < Access-Control-Allow-Origin: *\n2 < Content-Type: application/json\n{\n  \"bookingid\": 7,\n  \"booking\": {\n    \"firstname\": \"Put\",\n    \"lastname\": \"Before\",\n    \"totalprice\": 100,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n      \"checkin\": \"2018-01-01\",\n      \"checkout\": \"2019-01-01\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:61772/booking\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 133,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "bookingId = response.bookingid",
+          "line": 134,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking', bookingId",
+          "line": 136,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "updated",
+          "line": 137,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "put",
+          "line": 138,
+          "status": "passed",
+          "durationMillis": 15,
+          "hasLogs": true,
+          "logs": "request:\n3 > PUT http://localhost:61772/booking/7\n3 > Content-Type: application/json\n3 > Host: localhost:61772\n3 > Content-Length: 166\n3 > Connection: keep-alive\n3 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Put\",\n  \"lastname\": \"After\",\n  \"totalprice\": 222,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2018-02-01\",\n    \"checkout\": \"2019-02-01\"\n  },\n  \"additionalneeds\": \"Dinner\"\n}\n\nresponse time in milliseconds: 15\n3 < 403 PUT http://localhost:61772/booking/7\n3 < content-length: 21\n3 < Access-Control-Allow-Origin: *\n3 < Content-Type: application/json\n{\n  \"error\": \"Forbidden\"\n}\n\nPUT http://localhost:61772/booking/7\n403 (15 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "403",
+          "line": 139,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking', bookingId",
+          "line": 141,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 142,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "updated",
+          "line": 143,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "put",
+          "line": 144,
+          "status": "passed",
+          "durationMillis": 6,
+          "hasLogs": true,
+          "logs": "request:\n4 > PUT http://localhost:61772/booking/7\n4 > Cookie: token=3031957ca59d4ce\n4 > Content-Type: application/json\n4 > Host: localhost:61772\n4 > Content-Length: 166\n4 > Connection: keep-alive\n4 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Put\",\n  \"lastname\": \"After\",\n  \"totalprice\": 222,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2018-02-01\",\n    \"checkout\": \"2019-02-01\"\n  },\n  \"additionalneeds\": \"Dinner\"\n}\n\nresponse time in milliseconds: 6\n4 < 200 PUT http://localhost:61772/booking/7\n4 < content-length: 166\n4 < Access-Control-Allow-Origin: *\n4 < Content-Type: application/json\n{\n  \"firstname\": \"Put\",\n  \"lastname\": \"After\",\n  \"totalprice\": 222,\n  \"depositpaid\": false,\n  \"bookingdates\": {\n    \"checkin\": \"2018-02-01\",\n    \"checkout\": \"2019-02-01\"\n  },\n  \"additionalneeds\": \"Dinner\"\n}\n\nPUT http://localhost:61772/booking/7\n200 (6 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 145,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response == updated",
+          "line": 146,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "PATCH /booking/{id} supports Basic Auth",
+      "line": 148,
+      "passed": true,
+      "durationMillis": 12,
+      "startTime": 1778685571772,
+      "endTime": 1778685571784,
+      "refId": "[9:148]",
+      "sectionIndex": 9,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "karate.properties['mockBaseUrl']",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "payload =",
+          "line": 149,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking'",
+          "line": 160,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "payload",
+          "line": 161,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 162,
+          "status": "passed",
+          "durationMillis": 6,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:61772/booking\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:61772\n1 > Content-Length: 171\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Patch\",\n  \"lastname\": \"Before\",\n  \"totalprice\": 100,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2018-01-01\",\n    \"checkout\": \"2019-01-01\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 3\n1 < 200 POST http://localhost:61772/booking\n1 < content-length: 197\n1 < Access-Control-Allow-Origin: *\n1 < Content-Type: application/json\n{\n  \"bookingid\": 8,\n  \"booking\": {\n    \"firstname\": \"Patch\",\n    \"lastname\": \"Before\",\n    \"totalprice\": 100,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n      \"checkin\": \"2018-01-01\",\n      \"checkout\": \"2019-01-01\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:61772/booking\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 163,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "bookingId = response.bookingid",
+          "line": 164,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking', bookingId",
+          "line": 166,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Authorization = 'Basic YWRtaW46cGFzc3dvcmQxMjM='",
+          "line": 167,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "{ firstname: 'Patched', bookingdates: { checkout: '2019-03-01' } }",
+          "line": 168,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "patch",
+          "line": 169,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": true,
+          "logs": "request:\n2 > PATCH http://localhost:61772/booking/8\n2 > Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=\n2 > Content-Type: application/json\n2 > Host: localhost:61772\n2 > Content-Length: 64\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Patched\",\n  \"bookingdates\": {\n    \"checkout\": \"2019-03-01\"\n  }\n}\n\nresponse time in milliseconds: 3\n2 < 200 PATCH http://localhost:61772/booking/8\n2 < content-length: 173\n2 < Access-Control-Allow-Origin: *\n2 < Content-Type: application/json\n{\n  \"firstname\": \"Patched\",\n  \"lastname\": \"Before\",\n  \"totalprice\": 100,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2018-01-01\",\n    \"checkout\": \"2019-03-01\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nPATCH http://localhost:61772/booking/8\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 170,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.firstname == 'Patched'",
+          "line": 171,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.lastname == 'Before'",
+          "line": 172,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.bookingdates == { checkin: '2018-01-01', checkout: '2019-03-01' }",
+          "line": 173,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "DELETE /booking/{id} requires auth and removes booking",
+      "line": 175,
+      "passed": true,
+      "durationMillis": 22,
+      "startTime": 1778685571784,
+      "endTime": 1778685571806,
+      "refId": "[10:175]",
+      "sectionIndex": 10,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "karate.properties['mockBaseUrl']",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "payload =",
+          "line": 176,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'auth'",
+          "line": 187,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "{ username: 'admin', password: 'password123' }",
+          "line": 188,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 189,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:61772/auth\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:61772\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 3\n1 < 200 POST http://localhost:61772/auth\n1 < content-length: 27\n1 < Access-Control-Allow-Origin: *\n1 < Content-Type: application/json\n{\n  \"token\": \"7ac05e7f17374ac\"\n}\n\nPOST http://localhost:61772/auth\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 190,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 191,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking'",
+          "line": 193,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": "payload",
+          "line": 194,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 195,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": true,
+          "logs": "request:\n2 > POST http://localhost:61772/booking\n2 > Content-Type: application/json\n2 > Host: localhost:61772\n2 > Content-Length: 168\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"Delete\",\n  \"lastname\": \"Me\",\n  \"totalprice\": 100,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2018-01-01\",\n    \"checkout\": \"2019-01-01\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 2\n2 < 200 POST http://localhost:61772/booking\n2 < content-length: 194\n2 < Access-Control-Allow-Origin: *\n2 < Content-Type: application/json\n{\n  \"bookingid\": 9,\n  \"booking\": {\n    \"firstname\": \"Delete\",\n    \"lastname\": \"Me\",\n    \"totalprice\": 100,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n      \"checkin\": \"2018-01-01\",\n      \"checkout\": \"2019-01-01\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:61772/booking\n200 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 196,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "bookingId = response.bookingid",
+          "line": 197,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking', bookingId",
+          "line": 199,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "delete",
+          "line": 200,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": true,
+          "logs": "request:\n3 > DELETE http://localhost:61772/booking/9\n3 > Host: localhost:61772\n3 > Connection: keep-alive\n3 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 3\n3 < 403 DELETE http://localhost:61772/booking/9\n3 < content-length: 21\n3 < Access-Control-Allow-Origin: *\n3 < Content-Type: application/json\n{\n  \"error\": \"Forbidden\"\n}\n\nDELETE http://localhost:61772/booking/9\n403 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "403",
+          "line": 201,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking', bookingId",
+          "line": 203,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 204,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "delete",
+          "line": 205,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": true,
+          "logs": "request:\n4 > DELETE http://localhost:61772/booking/9\n4 > Cookie: token=7ac05e7f17374ac\n4 > Host: localhost:61772\n4 > Connection: keep-alive\n4 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 2\n4 < 201 DELETE http://localhost:61772/booking/9\n4 < content-length: 0\n4 < Access-Control-Allow-Origin: *\n4 < Content-Type: application/json\n\n\nDELETE http://localhost:61772/booking/9\n201 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "201",
+          "line": 206,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking', bookingId",
+          "line": 208,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 209,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n5 > GET http://localhost:61772/booking/9\n5 > Host: localhost:61772\n5 > Connection: keep-alive\n5 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 2\n5 < 404 GET http://localhost:61772/booking/9\n5 < content-length: 21\n5 < Access-Control-Allow-Origin: *\n5 < Content-Type: application/json\n{\n  \"error\": \"Not Found\"\n}\n\nGET http://localhost:61772/booking/9\n404 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "404",
+          "line": 210,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'booking', 999999",
+          "line": 212,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 213,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "delete",
+          "line": 214,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n6 > DELETE http://localhost:61772/booking/999999\n6 > Cookie: token=7ac05e7f17374ac\n6 > Host: localhost:61772\n6 > Connection: keep-alive\n6 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 3\n6 < 405 DELETE http://localhost:61772/booking/999999\n6 < content-length: 30\n6 < Access-Control-Allow-Origin: *\n6 < Content-Type: application/json\n{\n  \"error\": \"Method Not Allowed\"\n}\n\nDELETE http://localhost:61772/booking/999999\n405 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "405",
+          "line": 215,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    }
+  ]
+}</script>
+</body>
+</html>

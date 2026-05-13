@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="res/bootstrap.min.css"/>
+    <link rel="stylesheet" href="res/karate-report.css"/>
+    <link rel="icon" href="res/favicon.ico"/>
+    <link rel="stylesheet" href="https://unpkg.com/vis-timeline@7/styles/vis-timeline-graph2d.min.css"/>
+    <script src="https://unpkg.com/vis-timeline@7/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <script src="res/alpine.min.js" defer></script>
+    <title>Karate Timeline</title>
+    <style>
+        #timeline {
+            width: 100%;
+            height: calc(100vh - 150px);
+            min-height: 400px;
+        }
+        .vis-item.failed {
+            background-color: #dc3545 !important;
+            border-color: #b02a37 !important;
+            color: white !important;
+        }
+        .vis-item.passed {
+            background-color: #198754 !important;
+            border-color: #146c43 !important;
+            color: white !important;
+        }
+        .vis-label {
+            font-size: 0.9rem;
+        }
+        .vis-item-content {
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* Dark mode support */
+        [data-bs-theme="dark"] .vis-timeline {
+            border-color: #495057;
+        }
+        [data-bs-theme="dark"] .vis-panel.vis-background,
+        [data-bs-theme="dark"] .vis-panel.vis-center {
+            background-color: #212529;
+        }
+        [data-bs-theme="dark"] .vis-labelset .vis-label {
+            background-color: #343a40;
+            color: #f8f9fa;
+            border-color: #495057;
+        }
+        [data-bs-theme="dark"] .vis-time-axis .vis-text {
+            color: #adb5bd;
+        }
+        [data-bs-theme="dark"] .vis-time-axis .vis-grid.vis-minor {
+            border-color: #495057;
+        }
+        [data-bs-theme="dark"] .vis-time-axis .vis-grid.vis-major {
+            border-color: #6c757d;
+        }
+    </style>
+</head>
+<body x-data="KarateReport.timelineData()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="karate-summary.html">
+                <img src="res/karate-logo.svg" alt="Karate" height="32" class="d-inline-block align-middle me-2"/>
+                Timeline
+            </a>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="karate-summary.html">Summary</a>
+                </li>
+            </ul>
+            <button class="btn btn-sm btn-outline-light ms-2" @click="toggleTheme()" title="Toggle theme">
+                <span x-show="theme === 'light'">&#9790;</span>
+                <span x-show="theme === 'dark'">&#9788;</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-3">
+        <div class="row mb-3">
+            <div class="col">
+                <p class="text-muted mb-2">
+                    <span x-text="data.reportDate">Date</span>
+                    <span x-show="data.env" class="ms-2">| env: <span class="badge bg-info" x-text="data.env"></span></span>
+                    <span class="ms-2">| threads: <span class="badge bg-secondary" x-text="data.threads || 1"></span></span>
+                </p>
+                <div class="d-flex gap-3">
+                    <span><span class="badge bg-success">&nbsp;</span> Passed</span>
+                    <span><span class="badge bg-danger">&nbsp;</span> Failed</span>
+                </div>
+            </div>
+        </div>
+        <div id="timeline"></div>
+    </div>
+
+    <script src="res/bootstrap.bundle.min.js"></script>
+    <script src="res/karate-report.js"></script>
+    <script id="karate-data" type="application/json">{
+  "env": "mock-test",
+  "reportDate": "2026-05-13 22:19:31",
+  "threads": 1,
+  "karateVersion": "2.0.8",
+  "groups": [
+    {
+      "id": 1,
+      "content": "thread-1"
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "group": 1,
+      "content": "restful_booker_mock_test[1:6]",
+      "start": 1778685571360,
+      "end": 1778685571644,
+      "title": "restful_booker_mock_test[1:6] 22:19:31.360 (285 ms) GET /ping returns 201",
+      "className": "passed"
+    },
+    {
+      "id": 2,
+      "group": 1,
+      "content": "restful_booker_mock_test[2:11]",
+      "start": 1778685571646,
+      "end": 1778685571665,
+      "title": "restful_booker_mock_test[2:11] 22:19:31.646 (20 ms) POST /reset restores initial mock data",
+      "className": "passed"
+    },
+    {
+      "id": 3,
+      "group": 1,
+      "content": "restful_booker_mock_test[3:22]",
+      "start": 1778685571668,
+      "end": 1778685571679,
+      "title": "restful_booker_mock_test[3:22] 22:19:31.668 (12 ms) POST /auth returns token for valid credentials",
+      "className": "passed"
+    },
+    {
+      "id": 4,
+      "group": 1,
+      "content": "restful_booker_mock_test[4:29]",
+      "start": 1778685571681,
+      "end": 1778685571685,
+      "title": "restful_booker_mock_test[4:29] 22:19:31.681 (5 ms) POST /auth returns bad credentials for invalid login",
+      "className": "passed"
+    },
+    {
+      "id": 5,
+      "group": 1,
+      "content": "restful_booker_mock_test[5:36]",
+      "start": 1778685571686,
+      "end": 1778685571701,
+      "title": "restful_booker_mock_test[5:36] 22:19:31.686 (16 ms) GET /booking lists and filters booking IDs",
+      "className": "passed"
+    },
+    {
+      "id": 6,
+      "group": 1,
+      "content": "restful_booker_mock_test[6:54]",
+      "start": 1778685571704,
+      "end": 1778685571720,
+      "title": "restful_booker_mock_test[6:54] 22:19:31.704 (17 ms) GET /booking/{id} returns booking detail and 404",
+      "className": "passed"
+    },
+    {
+      "id": 7,
+      "group": 1,
+      "content": "restful_booker_mock_test[7:78]",
+      "start": 1778685571724,
+      "end": 1778685571735,
+      "title": "restful_booker_mock_test[7:78] 22:19:31.724 (12 ms) POST /booking creates a booking",
+      "className": "passed"
+    },
+    {
+      "id": 8,
+      "group": 1,
+      "content": "restful_booker_mock_test[8:101]",
+      "start": 1778685571736,
+      "end": 1778685571771,
+      "title": "restful_booker_mock_test[8:101] 22:19:31.736 (36 ms) PUT /booking/{id} requires auth and replaces booking",
+      "className": "passed"
+    },
+    {
+      "id": 9,
+      "group": 1,
+      "content": "restful_booker_mock_test[9:148]",
+      "start": 1778685571772,
+      "end": 1778685571783,
+      "title": "restful_booker_mock_test[9:148] 22:19:31.772 (12 ms) PATCH /booking/{id} supports Basic Auth",
+      "className": "passed"
+    },
+    {
+      "id": 10,
+      "group": 1,
+      "content": "restful_booker_mock_test[10:175]",
+      "start": 1778685571784,
+      "end": 1778685571805,
+      "title": "restful_booker_mock_test[10:175] 22:19:31.784 (22 ms) DELETE /booking/{id} requires auth and removes booking",
+      "className": "passed"
+    }
+  ]
+}</script>
+</body>
+</html>

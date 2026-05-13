@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="../res/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../res/karate-report.css"/>
+    <link rel="icon" href="../res/favicon.ico"/>
+    <script src="../res/alpine.min.js" defer></script>
+    <title>Karate Feature</title>
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            width: 220px;
+            overflow-y: auto;
+            border-right: 1px solid var(--bs-border-color);
+        }
+        .main-content {
+            margin-left: 220px;
+            padding: 1rem;
+        }
+        .step-row {
+            border-bottom: 1px solid var(--bs-border-color);
+            padding: 0.25rem 0;
+            font-family: var(--bs-font-monospace);
+            font-size: 0.875rem;
+        }
+        .step-row:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+        .step-row.clickable {
+            cursor: pointer;
+        }
+        .step-logs {
+            background-color: var(--bs-dark-bg-subtle);
+            border-radius: 0.25rem;
+            margin: 0.25rem 0 0.25rem 50px;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .nav-scenario {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-left: 3px solid transparent;
+        }
+        .nav-scenario:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+        .nav-scenario.active {
+            border-left-color: var(--bs-primary);
+            background-color: var(--bs-tertiary-bg);
+        }
+        .log-indicator {
+            font-size: 0.6rem;
+            vertical-align: middle;
+        }
+        .nested-call {
+            border-left: 3px solid var(--bs-info);
+            margin: 0.5rem 0 0.5rem 50px;
+            padding-left: 0.5rem;
+            background-color: var(--bs-tertiary-bg);
+        }
+        .nested-scenario {
+            border-radius: 0.25rem;
+            margin: 0.25rem 0;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .nested-scenario .nested-step {
+            font-family: var(--bs-font-monospace);
+            font-size: 0.8rem;
+            padding: 0.125rem 0;
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body x-data="KarateReport.featureData()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../karate-summary.html">
+                <img src="../res/karate-logo.svg" alt="Karate" height="32" class="d-inline-block align-middle me-2"/>
+                <span x-text="featureSimpleName">Feature</span>
+            </a>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../karate-summary.html">Summary</a>
+                </li>
+            </ul>
+            <button class="btn btn-sm btn-outline-light ms-2" @click="toggleTheme()" title="Toggle theme">
+                <span x-show="theme === 'light'">&#9790;</span>
+                <span x-show="theme === 'dark'">&#9788;</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Left Sidebar -->
+    <nav class="sidebar bg-body-tertiary pt-3">
+        <div class="px-3 mb-2">
+            <small class="text-muted">Scenarios</small>
+        </div>
+        <template x-for="scenario in data.scenarios" :key="scenario.refId">
+            <a class="nav-scenario d-block text-decoration-none"
+               :class="scenario.skipped ? 'text-warning' : (scenario.passed ? 'text-success' : 'text-danger')"
+               :href="'#' + scenario.refId"
+               :title="scenario.name">
+                <span class="fw-bold" x-text="scenario.refId"></span>
+                <span x-text="scenario.name ? ' ' + truncate(scenario.name, 20) : ''"></span>
+            </a>
+        </template>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" style="margin-top: 56px;">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="../karate-summary.html">Summary</a></li>
+                <li class="breadcrumb-item active" aria-current="page" x-text="data.name || data.path">Feature</li>
+            </ol>
+        </nav>
+
+        <h4 x-text="data.name || 'Feature'">Feature Name</h4>
+        <p class="text-muted small" x-text="data.path">path/to/feature</p>
+
+        <!-- Scenarios -->
+        <template x-for="scenario in data.scenarios" :key="scenario.refId">
+            <div class="card mb-3" :id="scenario.refId">
+                <div class="card-header d-flex justify-content-between align-items-center py-2"
+                     :class="scenario.skipped ? 'bg-warning-subtle' : (scenario.passed ? 'bg-success-subtle' : 'bg-danger-subtle')">
+                    <span>
+                        <span class="fw-bold" x-text="scenario.refId"></span>
+                        <span x-text="scenario.name"></span>
+                        <template x-if="scenario.isOutlineExample">
+                            <span class="badge bg-info ms-1">Outline</span>
+                        </template>
+                        <template x-for="tag in scenario.tags || []" :key="tag">
+                            <span class="badge bg-secondary ms-1" x-text="tag"></span>
+                        </template>
+                    </span>
+                    <span>
+                        <small class="text-muted me-2" x-text="scenario.durationMillis + ' ms'"></small>
+                        <span x-show="scenario.skipped" class="badge bg-warning">SKIP</span>
+                        <span x-show="scenario.passed && !scenario.skipped" class="badge bg-success">PASS</span>
+                        <span x-show="!scenario.passed" class="badge bg-danger">FAIL</span>
+                    </span>
+                </div>
+                <div class="card-body p-0" x-html="renderSteps(scenario.steps)">
+                </div>
+                <!-- Scenario Error -->
+                <template x-if="scenario.error && !scenario.steps?.some(s => s.error)">
+                    <div class="card-footer bg-danger-subtle">
+                        <pre class="mb-0 small text-danger" x-text="scenario.error"></pre>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </main>
+
+    <script src="../res/bootstrap.bundle.min.js"></script>
+    <script src="../res/karate-report.js"></script>
+    <script id="karate-data" type="application/json">{
+  "path": "target/test-classes/f1_api/booking/deleteBooking.feature",
+  "name": "Delete Booking API",
+  "relativePath": "target/test-classes/f1_api/booking/deleteBooking.feature",
+  "passed": true,
+  "durationMillis": 85,
+  "scenarios": [
+    {
+      "name": "DEL-EP-01 xoá thành công với token hợp lệ",
+      "line": 22,
+      "passed": true,
+      "durationMillis": 11,
+      "startTime": 1778685507482,
+      "endTime": 1778685507493,
+      "refId": "[1:22]",
+      "sectionIndex": 1,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 8,
+          "comments": [
+            "# Login lấy token"
+          ],
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 9,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 1\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-BYWcYWWquPL6P88y0Pv16g1d9wk\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"e25299678d559c0\"\n}\n\nPOST http://localhost:3001/auth\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 17,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 19,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/2'",
+          "line": 24,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 25,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "delete",
+          "line": 26,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": true,
+          "logs": "request:\n2 > DELETE http://localhost:3001/booking/2\n2 > Cookie: token=e25299678d559c0\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 4\n2 < 201 DELETE http://localhost:3001/booking/2\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"7-rM9AyJuqT6iOan/xHh+AW+7K/T8\"\n2 < Connection: keep-alive\n2 < Content-Length: 7\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: text/plain; charset=utf-8\nCreated\n\nDELETE http://localhost:3001/booking/2\n201 (4 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "201",
+          "line": 27,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "DEL-EP-02 xoá không hợp lệ: không có token",
+      "line": 30,
+      "passed": true,
+      "durationMillis": 15,
+      "startTime": 1778685507495,
+      "endTime": 1778685507510,
+      "refId": "[2:30]",
+      "sectionIndex": 2,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 8,
+          "comments": [
+            "# Login lấy token"
+          ],
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 9,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 8,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 3\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-YzNtp7qO04XvvhSesIaI7I69tS4\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"31a5629beec31a1\"\n}\n\nPOST http://localhost:3001/auth\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 17,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 19,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/3'",
+          "line": 32,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "delete",
+          "line": 33,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": true,
+          "logs": "request:\n2 > DELETE http://localhost:3001/booking/3\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 1\n2 < 403 DELETE http://localhost:3001/booking/3\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"9-PatfYBLj4Um1qTm5zrukoLhNyPU\"\n2 < Connection: keep-alive\n2 < Content-Length: 9\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: text/plain; charset=utf-8\nForbidden\n\nDELETE http://localhost:3001/booking/3\n403 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "403",
+          "line": 34,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "DEL-EP-03 xoá không hợp lệ: token sai",
+      "line": 37,
+      "passed": true,
+      "durationMillis": 15,
+      "startTime": 1778685507511,
+      "endTime": 1778685507526,
+      "refId": "[3:37]",
+      "sectionIndex": 3,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 8,
+          "comments": [
+            "# Login lấy token"
+          ],
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 9,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 8,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 2\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-pN0R3ccf5fhHJL+EjFsmp6dvpZc\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"651a2b075f6142d\"\n}\n\nPOST http://localhost:3001/auth\n200 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 17,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 19,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/3'",
+          "line": 39,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=faketoken123'",
+          "line": 40,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "delete",
+          "line": 41,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": true,
+          "logs": "request:\n2 > DELETE http://localhost:3001/booking/3\n2 > Cookie: token=faketoken123\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 3\n2 < 403 DELETE http://localhost:3001/booking/3\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"9-PatfYBLj4Um1qTm5zrukoLhNyPU\"\n2 < Connection: keep-alive\n2 < Content-Length: 9\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: text/plain; charset=utf-8\nForbidden\n\nDELETE http://localhost:3001/booking/3\n403 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "403",
+          "line": 42,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "DEL-EP-04 xoá booking đã bị xoá",
+      "line": 45,
+      "passed": true,
+      "durationMillis": 25,
+      "startTime": 1778685507528,
+      "endTime": 1778685507553,
+      "refId": "[4:45]",
+      "sectionIndex": 4,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 8,
+          "comments": [
+            "# Login lấy token"
+          ],
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 9,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 12,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 5\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-Oxo/A6AEJqRwY9vQxEHy/5va2ao\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"79511194f363b55\"\n}\n\nPOST http://localhost:3001/auth\n200 (5 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 17,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 19,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/4'",
+          "line": 48,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 49,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "delete",
+          "line": 50,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": true,
+          "logs": "request:\n2 > DELETE http://localhost:3001/booking/4\n2 > Cookie: token=79511194f363b55\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 2\n2 < 201 DELETE http://localhost:3001/booking/4\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"7-rM9AyJuqT6iOan/xHh+AW+7K/T8\"\n2 < Connection: keep-alive\n2 < Content-Length: 7\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: text/plain; charset=utf-8\nCreated\n\nDELETE http://localhost:3001/booking/4\n201 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "201",
+          "line": 51,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/4'",
+          "line": 54,
+          "comments": [
+            "# Xoá lần hai"
+          ],
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 55,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "delete",
+          "line": 56,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n3 > DELETE http://localhost:3001/booking/4\n3 > Cookie: token=79511194f363b55\n3 > Accept: */*\n3 > Host: localhost:3001\n3 > Connection: keep-alive\n3 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 3\n3 < 405 DELETE http://localhost:3001/booking/4\n3 < Keep-Alive: timeout=5\n3 < ETag: W/\"12-UGJMK66P4abaBlq0vKHJaCKuGCA\"\n3 < Connection: keep-alive\n3 < Content-Length: 18\n3 < Date: Wed, 13 May 2026 15:18:27 GMT\n3 < X-Powered-By: Express\n3 < Content-Type: text/plain; charset=utf-8\nMethod Not Allowed\n\nDELETE http://localhost:3001/booking/4\n405 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "405",
+          "line": 57,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "DEL-EP-05 xoá booking không tồn tại",
+      "line": 60,
+      "passed": true,
+      "durationMillis": 10,
+      "startTime": 1778685507554,
+      "endTime": 1778685507564,
+      "refId": "[5:60]",
+      "sectionIndex": 5,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 8,
+          "comments": [
+            "# Login lấy token"
+          ],
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 9,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 6,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 3\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-3iiKLv6pEAUR95hImQLLvtz8ggM\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"fcb1b1af54399e7\"\n}\n\nPOST http://localhost:3001/auth\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 17,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 19,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/999999'",
+          "line": 62,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 63,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "delete",
+          "line": 64,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": true,
+          "logs": "request:\n2 > DELETE http://localhost:3001/booking/999999\n2 > Cookie: token=fcb1b1af54399e7\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 2\n2 < 405 DELETE http://localhost:3001/booking/999999\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"12-UGJMK66P4abaBlq0vKHJaCKuGCA\"\n2 < Connection: keep-alive\n2 < Content-Length: 18\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: text/plain; charset=utf-8\nMethod Not Allowed\n\nDELETE http://localhost:3001/booking/999999\n405 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "405",
+          "line": 65,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    }
+  ]
+}</script>
+</body>
+</html>

@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="../res/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../res/karate-report.css"/>
+    <link rel="icon" href="../res/favicon.ico"/>
+    <script src="../res/alpine.min.js" defer></script>
+    <title>Karate Feature</title>
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            width: 220px;
+            overflow-y: auto;
+            border-right: 1px solid var(--bs-border-color);
+        }
+        .main-content {
+            margin-left: 220px;
+            padding: 1rem;
+        }
+        .step-row {
+            border-bottom: 1px solid var(--bs-border-color);
+            padding: 0.25rem 0;
+            font-family: var(--bs-font-monospace);
+            font-size: 0.875rem;
+        }
+        .step-row:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+        .step-row.clickable {
+            cursor: pointer;
+        }
+        .step-logs {
+            background-color: var(--bs-dark-bg-subtle);
+            border-radius: 0.25rem;
+            margin: 0.25rem 0 0.25rem 50px;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .nav-scenario {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-left: 3px solid transparent;
+        }
+        .nav-scenario:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+        .nav-scenario.active {
+            border-left-color: var(--bs-primary);
+            background-color: var(--bs-tertiary-bg);
+        }
+        .log-indicator {
+            font-size: 0.6rem;
+            vertical-align: middle;
+        }
+        .nested-call {
+            border-left: 3px solid var(--bs-info);
+            margin: 0.5rem 0 0.5rem 50px;
+            padding-left: 0.5rem;
+            background-color: var(--bs-tertiary-bg);
+        }
+        .nested-scenario {
+            border-radius: 0.25rem;
+            margin: 0.25rem 0;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .nested-scenario .nested-step {
+            font-family: var(--bs-font-monospace);
+            font-size: 0.8rem;
+            padding: 0.125rem 0;
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body x-data="KarateReport.featureData()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../karate-summary.html">
+                <img src="../res/karate-logo.svg" alt="Karate" height="32" class="d-inline-block align-middle me-2"/>
+                <span x-text="featureSimpleName">Feature</span>
+            </a>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../karate-summary.html">Summary</a>
+                </li>
+            </ul>
+            <button class="btn btn-sm btn-outline-light ms-2" @click="toggleTheme()" title="Toggle theme">
+                <span x-show="theme === 'light'">&#9790;</span>
+                <span x-show="theme === 'dark'">&#9788;</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Left Sidebar -->
+    <nav class="sidebar bg-body-tertiary pt-3">
+        <div class="px-3 mb-2">
+            <small class="text-muted">Scenarios</small>
+        </div>
+        <template x-for="scenario in data.scenarios" :key="scenario.refId">
+            <a class="nav-scenario d-block text-decoration-none"
+               :class="scenario.skipped ? 'text-warning' : (scenario.passed ? 'text-success' : 'text-danger')"
+               :href="'#' + scenario.refId"
+               :title="scenario.name">
+                <span class="fw-bold" x-text="scenario.refId"></span>
+                <span x-text="scenario.name ? ' ' + truncate(scenario.name, 20) : ''"></span>
+            </a>
+        </template>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" style="margin-top: 56px;">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="../karate-summary.html">Summary</a></li>
+                <li class="breadcrumb-item active" aria-current="page" x-text="data.name || data.path">Feature</li>
+            </ol>
+        </nav>
+
+        <h4 x-text="data.name || 'Feature'">Feature Name</h4>
+        <p class="text-muted small" x-text="data.path">path/to/feature</p>
+
+        <!-- Scenarios -->
+        <template x-for="scenario in data.scenarios" :key="scenario.refId">
+            <div class="card mb-3" :id="scenario.refId">
+                <div class="card-header d-flex justify-content-between align-items-center py-2"
+                     :class="scenario.skipped ? 'bg-warning-subtle' : (scenario.passed ? 'bg-success-subtle' : 'bg-danger-subtle')">
+                    <span>
+                        <span class="fw-bold" x-text="scenario.refId"></span>
+                        <span x-text="scenario.name"></span>
+                        <template x-if="scenario.isOutlineExample">
+                            <span class="badge bg-info ms-1">Outline</span>
+                        </template>
+                        <template x-for="tag in scenario.tags || []" :key="tag">
+                            <span class="badge bg-secondary ms-1" x-text="tag"></span>
+                        </template>
+                    </span>
+                    <span>
+                        <small class="text-muted me-2" x-text="scenario.durationMillis + ' ms'"></small>
+                        <span x-show="scenario.skipped" class="badge bg-warning">SKIP</span>
+                        <span x-show="scenario.passed && !scenario.skipped" class="badge bg-success">PASS</span>
+                        <span x-show="!scenario.passed" class="badge bg-danger">FAIL</span>
+                    </span>
+                </div>
+                <div class="card-body p-0" x-html="renderSteps(scenario.steps)">
+                </div>
+                <!-- Scenario Error -->
+                <template x-if="scenario.error && !scenario.steps?.some(s => s.error)">
+                    <div class="card-footer bg-danger-subtle">
+                        <pre class="mb-0 small text-danger" x-text="scenario.error"></pre>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </main>
+
+    <script src="../res/bootstrap.bundle.min.js"></script>
+    <script src="../res/karate-report.js"></script>
+    <script id="karate-data" type="application/json">{
+  "path": "target/test-classes/f1_api/booking/updateBooking2.feature",
+  "name": "Partial Update Booking API",
+  "relativePath": "target/test-classes/f1_api/booking/updateBooking2.feature",
+  "passed": true,
+  "durationMillis": 76,
+  "scenarios": [
+    {
+      "name": "PAT-EP-01 cập nhật 1 field",
+      "line": 20,
+      "passed": true,
+      "durationMillis": 11,
+      "startTime": 1778685507659,
+      "endTime": 1778685507670,
+      "refId": "[1:20]",
+      "sectionIndex": 1,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 7,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 8,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 15,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 1\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-ylBiR/B2UHN75eTqebLtbSF9e04\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"d8446fe669a7b6b\"\n}\n\nPOST http://localhost:3001/auth\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 18,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/1'",
+          "line": 22,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 23,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n2 > GET http://localhost:3001/booking/1\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 2\n2 < 200 GET http://localhost:3001/booking/1\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"c2-EeQnhRaebx6+kSbwoud7pP6ktZA\"\n2 < Connection: keep-alive\n2 < Content-Length: 194\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: application/json; charset=utf-8\n{\n  \"firstname\": \"UpdatedName\",\n  \"lastname\": \"Nguyen\",\n  \"totalprice\": 168,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-15\"\n  },\n  \"additionalneeds\": \"Breakfast, Airport Shuttle\"\n}\n\nGET http://localhost:3001/booking/1\n200 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 24,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "oldLastname = response.lastname",
+          "line": 26,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "oldTotalprice = response.totalprice",
+          "line": 27,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/1'",
+          "line": 29,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Content-Type = 'application/json'",
+          "line": 30,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 31,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 32,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "patch",
+          "line": 38,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n3 > PATCH http://localhost:3001/booking/1\n3 > Content-Type: application/json\n3 > Cookie: token=d8446fe669a7b6b\n3 > Accept: */*\n3 > Host: localhost:3001\n3 > Content-Length: 27\n3 > Connection: keep-alive\n3 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"UpdatedName\"\n}\n\nresponse time in milliseconds: 1\n3 < 200 PATCH http://localhost:3001/booking/1\n3 < Keep-Alive: timeout=5\n3 < ETag: W/\"c2-EeQnhRaebx6+kSbwoud7pP6ktZA\"\n3 < Connection: keep-alive\n3 < Content-Length: 194\n3 < Date: Wed, 13 May 2026 15:18:27 GMT\n3 < X-Powered-By: Express\n3 < Content-Type: application/json; charset=utf-8\n{\n  \"firstname\": \"UpdatedName\",\n  \"lastname\": \"Nguyen\",\n  \"totalprice\": 168,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-15\"\n  },\n  \"additionalneeds\": \"Breakfast, Airport Shuttle\"\n}\n\nPATCH http://localhost:3001/booking/1\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 39,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.firstname == 'UpdatedName'",
+          "line": 41,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.lastname == oldLastname",
+          "line": 42,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.totalprice == oldTotalprice",
+          "line": 43,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "PAT-EP-02 cập nhật nhiều field cùng lúc",
+      "line": 46,
+      "passed": true,
+      "durationMillis": 10,
+      "startTime": 1778685507671,
+      "endTime": 1778685507681,
+      "refId": "[2:46]",
+      "sectionIndex": 2,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 7,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 8,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 15,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 1\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-kp5t2kvT7+yh2SJnjwvcPHnkhps\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"e6660e855cb53a9\"\n}\n\nPOST http://localhost:3001/auth\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 18,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/1'",
+          "line": 48,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "get",
+          "line": 49,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n2 > GET http://localhost:3001/booking/1\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n\nresponse time in milliseconds: 2\n2 < 200 GET http://localhost:3001/booking/1\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"c2-EeQnhRaebx6+kSbwoud7pP6ktZA\"\n2 < Connection: keep-alive\n2 < Content-Length: 194\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: application/json; charset=utf-8\n{\n  \"firstname\": \"UpdatedName\",\n  \"lastname\": \"Nguyen\",\n  \"totalprice\": 168,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-15\"\n  },\n  \"additionalneeds\": \"Breakfast, Airport Shuttle\"\n}\n\nGET http://localhost:3001/booking/1\n200 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 50,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "oldDepositpaid = response.depositpaid",
+          "line": 52,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/1'",
+          "line": 54,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Content-Type = 'application/json'",
+          "line": 55,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 56,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 57,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "patch",
+          "line": 65,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n3 > PATCH http://localhost:3001/booking/1\n3 > Content-Type: application/json\n3 > Cookie: token=e6660e855cb53a9\n3 > Accept: */*\n3 > Host: localhost:3001\n3 > Content-Length: 54\n3 > Connection: keep-alive\n3 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"New\",\n  \"lastname\": \"Name\",\n  \"totalprice\": 200\n}\n\nresponse time in milliseconds: 1\n3 < 200 PATCH http://localhost:3001/booking/1\n3 < Keep-Alive: timeout=5\n3 < ETag: W/\"b8-9WBxLH9sGR2A0zUd9pqZku5o+A8\"\n3 < Connection: keep-alive\n3 < Content-Length: 184\n3 < Date: Wed, 13 May 2026 15:18:27 GMT\n3 < X-Powered-By: Express\n3 < Content-Type: application/json; charset=utf-8\n{\n  \"firstname\": \"New\",\n  \"lastname\": \"Name\",\n  \"totalprice\": 200,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-15\"\n  },\n  \"additionalneeds\": \"Breakfast, Airport Shuttle\"\n}\n\nPATCH http://localhost:3001/booking/1\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 66,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.firstname == 'New'",
+          "line": 68,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.lastname == 'Name'",
+          "line": 69,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.totalprice == 200",
+          "line": 70,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.depositpaid == oldDepositpaid",
+          "line": 71,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "PAT-EP-03 cập nhật không hợp lệ: không có token",
+      "line": 74,
+      "passed": true,
+      "durationMillis": 11,
+      "startTime": 1778685507682,
+      "endTime": 1778685507693,
+      "refId": "[3:74]",
+      "sectionIndex": 3,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 7,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 8,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 15,
+          "status": "passed",
+          "durationMillis": 6,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 1\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-jBjfrxqWXErC0bwhppcRnU8yUqs\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"0a14421f9faae77\"\n}\n\nPOST http://localhost:3001/auth\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 18,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/1'",
+          "line": 76,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Content-Type = 'application/json'",
+          "line": 77,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 78,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "patch",
+          "line": 84,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n2 > PATCH http://localhost:3001/booking/1\n2 > Content-Type: application/json\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Content-Length: 27\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"UpdatedName\"\n}\n\nresponse time in milliseconds: 1\n2 < 403 PATCH http://localhost:3001/booking/1\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"9-PatfYBLj4Um1qTm5zrukoLhNyPU\"\n2 < Connection: keep-alive\n2 < Content-Length: 9\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: text/plain; charset=utf-8\nForbidden\n\nPATCH http://localhost:3001/booking/1\n403 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "403",
+          "line": 85,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "PAT-EP-04 field không tồn tại trong schema",
+      "line": 88,
+      "passed": true,
+      "durationMillis": 9,
+      "startTime": 1778685507694,
+      "endTime": 1778685507703,
+      "refId": "[4:88]",
+      "sectionIndex": 4,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 7,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 8,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 15,
+          "status": "passed",
+          "durationMillis": 5,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 3\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-WEkhJ8N4zxkuHg8ig/LH3PT5zTs\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"73964d24059899f\"\n}\n\nPOST http://localhost:3001/auth\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 18,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/1'",
+          "line": 90,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Content-Type = 'application/json'",
+          "line": 91,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 92,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 93,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "patch",
+          "line": 100,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n2 > PATCH http://localhost:3001/booking/1\n2 > Content-Type: application/json\n2 > Cookie: token=73964d24059899f\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Content-Length: 43\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"unknownfield\": \"value\",\n  \"firstname\": \"Real\"\n}\n\nresponse time in milliseconds: 2\n2 < 200 PATCH http://localhost:3001/booking/1\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"b9-87YrcX69twnj9xFFz5UaXbu2dTM\"\n2 < Connection: keep-alive\n2 < Content-Length: 185\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: application/json; charset=utf-8\n{\n  \"firstname\": \"Real\",\n  \"lastname\": \"Name\",\n  \"totalprice\": 200,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-15\"\n  },\n  \"additionalneeds\": \"Breakfast, Airport Shuttle\"\n}\n\nPATCH http://localhost:3001/booking/1\n200 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 101,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.firstname == 'Real'",
+          "line": 103,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response !contains { unknownfield: 'value' }",
+          "line": 104,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "PAT-BVA-01 body rỗng {}",
+      "line": 107,
+      "passed": true,
+      "durationMillis": 8,
+      "startTime": 1778685507705,
+      "endTime": 1778685507713,
+      "refId": "[5:107]",
+      "sectionIndex": 5,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 7,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 8,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 15,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 1\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-nh8xMUHyXLiYBvLOgsX1qTWkgxY\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"454cea1e3954776\"\n}\n\nPOST http://localhost:3001/auth\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 18,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/1'",
+          "line": 109,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Content-Type = 'application/json'",
+          "line": 110,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 111,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 112,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "patch",
+          "line": 116,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n2 > PATCH http://localhost:3001/booking/1\n2 > Content-Type: application/json\n2 > Cookie: token=454cea1e3954776\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Content-Length: 2\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n}\n\nresponse time in milliseconds: 1\n2 < 200 PATCH http://localhost:3001/booking/1\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"b9-87YrcX69twnj9xFFz5UaXbu2dTM\"\n2 < Connection: keep-alive\n2 < Content-Length: 185\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: application/json; charset=utf-8\n{\n  \"firstname\": \"Real\",\n  \"lastname\": \"Name\",\n  \"totalprice\": 200,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-15\"\n  },\n  \"additionalneeds\": \"Breakfast, Airport Shuttle\"\n}\n\nPATCH http://localhost:3001/booking/1\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 117,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "PAT-BVA-02 firstname là chuỗi rỗng",
+      "line": 120,
+      "passed": true,
+      "durationMillis": 7,
+      "startTime": 1778685507714,
+      "endTime": 1778685507721,
+      "refId": "[6:120]",
+      "sectionIndex": 6,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 7,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 8,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 15,
+          "status": "passed",
+          "durationMillis": 4,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 1\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-JviNUTQr4amr9R77xbbgluqJ3u8\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"adb98d34c9a8c00\"\n}\n\nPOST http://localhost:3001/auth\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 18,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/1'",
+          "line": 122,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Content-Type = 'application/json'",
+          "line": 123,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 124,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 125,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "patch",
+          "line": 131,
+          "status": "passed",
+          "durationMillis": 2,
+          "hasLogs": true,
+          "logs": "request:\n2 > PATCH http://localhost:3001/booking/1\n2 > Content-Type: application/json\n2 > Cookie: token=adb98d34c9a8c00\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Content-Length: 16\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"\"\n}\n\nresponse time in milliseconds: 1\n2 < 200 PATCH http://localhost:3001/booking/1\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"b5-DJxt4m7xUhHOCVyQ7IEzeDRymQ8\"\n2 < Connection: keep-alive\n2 < Content-Length: 181\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: application/json; charset=utf-8\n{\n  \"firstname\": \"\",\n  \"lastname\": \"Name\",\n  \"totalprice\": 200,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-15\"\n  },\n  \"additionalneeds\": \"Breakfast, Airport Shuttle\"\n}\n\nPATCH http://localhost:3001/booking/1\n200 (1 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "print",
+          "text": "responseStatus",
+          "line": 134,
+          "comments": [
+            "# Ghi nhận hành vi thực tế"
+          ],
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": true,
+          "logs": "200\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "print",
+          "text": "response",
+          "line": 135,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": true,
+          "logs": "{\"firstname\":\"\",\"lastname\":\"Name\",\"totalprice\":200,\"depositpaid\":true,\"bookingdates\":{\"checkin\":\"2026-05-12\",\"checkout\":\"2026-05-15\"},\"additionalneeds\":\"Breakfast, Airport Shuttle\"}\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    },
+    {
+      "name": "PAT-BVA-03 totalprice = 0",
+      "line": 138,
+      "passed": true,
+      "durationMillis": 12,
+      "startTime": 1778685507722,
+      "endTime": 1778685507734,
+      "refId": "[7:138]",
+      "sectionIndex": 7,
+      "exampleIndex": -1,
+      "isOutlineExample": false,
+      "thread": "thread-1",
+      "skipped": false,
+      "steps": [
+        {
+          "prefix": "*",
+          "keyword": "url",
+          "text": "baseUrl",
+          "line": 4,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "configure",
+          "text": "headers = { 'Accept': '*/*' }",
+          "line": 5,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/auth'",
+          "line": 7,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 8,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "post",
+          "line": 15,
+          "status": "passed",
+          "durationMillis": 7,
+          "hasLogs": true,
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Accept: */*\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 45\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}\n\nresponse time in milliseconds: 2\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1b-DKvemKQ++NcYfJX5L+53pSX0Vgg\"\n1 < Connection: keep-alive\n1 < Content-Length: 27\n1 < Date: Wed, 13 May 2026 15:18:27 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"token\": \"8afd2718447b61d\"\n}\n\nPOST http://localhost:3001/auth\n200 (2 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 16,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "*",
+          "keyword": "def",
+          "text": "token = response.token",
+          "line": 18,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Given",
+          "keyword": "path",
+          "text": "'/booking/1'",
+          "line": 140,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Content-Type = 'application/json'",
+          "line": 141,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "header",
+          "text": "Cookie = 'token=' + token",
+          "line": 142,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "request",
+          "text": null,
+          "line": 143,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "When",
+          "keyword": "method",
+          "text": "patch",
+          "line": 149,
+          "status": "passed",
+          "durationMillis": 3,
+          "hasLogs": true,
+          "logs": "request:\n2 > PATCH http://localhost:3001/booking/1\n2 > Content-Type: application/json\n2 > Cookie: token=8afd2718447b61d\n2 > Accept: */*\n2 > Host: localhost:3001\n2 > Content-Length: 16\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"totalprice\": 0\n}\n\nresponse time in milliseconds: 3\n2 < 200 PATCH http://localhost:3001/booking/1\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"b3-uJclaKYKtT9MfMBWHnJ8iBJSrSM\"\n2 < Connection: keep-alive\n2 < Content-Length: 179\n2 < Date: Wed, 13 May 2026 15:18:27 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: application/json; charset=utf-8\n{\n  \"firstname\": \"\",\n  \"lastname\": \"Name\",\n  \"totalprice\": 0,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-15\"\n  },\n  \"additionalneeds\": \"Breakfast, Airport Shuttle\"\n}\n\nPATCH http://localhost:3001/booking/1\n200 (3 ms)\n",
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "Then",
+          "keyword": "status",
+          "text": "200",
+          "line": 150,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        },
+        {
+          "prefix": "And",
+          "keyword": "match",
+          "text": "response.totalprice == 0",
+          "line": 152,
+          "status": "passed",
+          "durationMillis": 0,
+          "hasLogs": false,
+          "hasEmbeds": false,
+          "hasCallResults": false
+        }
+      ]
+    }
+  ]
+}</script>
+</body>
+</html>
