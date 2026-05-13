@@ -1,7 +1,5 @@
 **/node_modules
-**/target
-karate-automation/karate/my_project/target/**/*.html
-karate-automation/karate/my_project/target/**/*.lst
+
 **/.DS_Store
 npm-debug.log
 .idea
