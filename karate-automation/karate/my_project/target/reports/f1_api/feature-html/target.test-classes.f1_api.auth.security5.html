@@ -168,15 +168,15 @@
   "name": "Timing attack check",
   "relativePath": "target/test-classes/f1_api/auth/security5.feature",
   "passed": true,
-  "durationMillis": 13,
+  "durationMillis": 17,
   "scenarios": [
     {
       "name": "Timing attack check",
       "line": 3,
       "passed": true,
-      "durationMillis": 11,
-      "startTime": 1778685506707,
-      "endTime": 1778685506718,
+      "durationMillis": 15,
+      "startTime": 1778830695452,
+      "endTime": 1778830695467,
       "refId": "[1:3]",
       "sectionIndex": 1,
       "exampleIndex": -1,
@@ -212,9 +212,9 @@
           "text": "post",
           "line": 6,
           "status": "passed",
-          "durationMillis": 4,
+          "durationMillis": 5,
           "hasLogs": true,
-          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 39\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"wrong\"\n}\n\nresponse time in milliseconds: 1\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1c-J3EiwfZwVQjKTKvpvazUfTni8fI\"\n1 < Connection: keep-alive\n1 < Content-Length: 28\n1 < Date: Wed, 13 May 2026 15:18:26 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"reason\": \"Bad credentials\"\n}\n\nPOST http://localhost:3001/auth\n200 (1 ms)\n",
+          "logs": "request:\n1 > POST http://localhost:3001/auth\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 39\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"admin\",\n  \"password\": \"wrong\"\n}\n\nresponse time in milliseconds: 3\n1 < 200 POST http://localhost:3001/auth\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"1c-J3EiwfZwVQjKTKvpvazUfTni8fI\"\n1 < Connection: keep-alive\n1 < Content-Length: 28\n1 < Date: Fri, 15 May 2026 07:38:15 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"reason\": \"Bad credentials\"\n}\n\nPOST http://localhost:3001/auth\n200 (3 ms)\n",
           "hasEmbeds": false,
           "hasCallResults": false
         },
@@ -259,7 +259,7 @@
           "status": "passed",
           "durationMillis": 2,
           "hasLogs": true,
-          "logs": "request:\n2 > POST http://localhost:3001/auth\n2 > Content-Type: application/json\n2 > Host: localhost:3001\n2 > Content-Length: 42\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"fakeuser\",\n  \"password\": \"wrong\"\n}\n\nresponse time in milliseconds: 2\n2 < 200 POST http://localhost:3001/auth\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"1c-J3EiwfZwVQjKTKvpvazUfTni8fI\"\n2 < Connection: keep-alive\n2 < Content-Length: 28\n2 < Date: Wed, 13 May 2026 15:18:26 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: application/json; charset=utf-8\n{\n  \"reason\": \"Bad credentials\"\n}\n\nPOST http://localhost:3001/auth\n200 (2 ms)\n",
+          "logs": "request:\n2 > POST http://localhost:3001/auth\n2 > Content-Type: application/json\n2 > Host: localhost:3001\n2 > Content-Length: 42\n2 > Connection: keep-alive\n2 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"username\": \"fakeuser\",\n  \"password\": \"wrong\"\n}\n\nresponse time in milliseconds: 2\n2 < 200 POST http://localhost:3001/auth\n2 < Keep-Alive: timeout=5\n2 < ETag: W/\"1c-J3EiwfZwVQjKTKvpvazUfTni8fI\"\n2 < Connection: keep-alive\n2 < Content-Length: 28\n2 < Date: Fri, 15 May 2026 07:38:15 GMT\n2 < X-Powered-By: Express\n2 < Content-Type: application/json; charset=utf-8\n{\n  \"reason\": \"Bad credentials\"\n}\n\nPOST http://localhost:3001/auth\n200 (2 ms)\n",
           "hasEmbeds": false,
           "hasCallResults": false
         },
@@ -282,7 +282,7 @@
           "status": "passed",
           "durationMillis": 6,
           "hasLogs": true,
-          "logs": "time1: 1 time2: 2\n",
+          "logs": "time1: 3 time2: 2\n",
           "hasEmbeds": false,
           "hasCallResults": false
         }

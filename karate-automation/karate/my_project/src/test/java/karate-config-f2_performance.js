@@ -2,7 +2,7 @@ function fn() {
   var config = {};
 
   config.baseUrl = karate.properties['api.baseUrl'] || 'http://localhost:3001';
-  config.env = karate.env || 'perf';
+  config.env = karate.env || 'f2_performance';
 
   karate.configure('connectTimeout', 5000);
   karate.configure('readTimeout', 5000);

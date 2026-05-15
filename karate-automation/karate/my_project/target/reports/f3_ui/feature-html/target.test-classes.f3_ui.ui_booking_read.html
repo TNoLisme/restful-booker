@@ -168,15 +168,15 @@
   "name": "Booking read UI",
   "relativePath": "target/test-classes/f3_ui/ui_booking_read.feature",
   "passed": true,
-  "durationMillis": 5174,
+  "durationMillis": 6783,
   "scenarios": [
     {
       "name": "List bookings with empty, firstname, lastname and date filters",
       "line": 24,
       "passed": true,
-      "durationMillis": 2628,
-      "startTime": 1778685532700,
-      "endTime": 1778685535328,
+      "durationMillis": 3405,
+      "startTime": 1778830733041,
+      "endTime": 1778830736446,
       "refId": "[1:24]",
       "sectionIndex": 1,
       "exampleIndex": -1,
@@ -256,9 +256,9 @@
           "text": "post",
           "line": 20,
           "status": "passed",
-          "durationMillis": 125,
+          "durationMillis": 399,
           "hasLogs": true,
-          "logs": "request:\n1 > POST http://localhost:3001/booking\n1 > Accept: application/json\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 170\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"UiRead\",\n  \"lastname\": \"Case\",\n  \"totalprice\": 151,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-14\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 8\n1 < 200 POST http://localhost:3001/booking\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"c5-NqLSO1X3d4x8eMbPJKfCbVU92XU\"\n1 < Connection: keep-alive\n1 < Content-Length: 197\n1 < Date: Wed, 13 May 2026 15:18:52 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"bookingid\": 27,\n  \"booking\": {\n    \"firstname\": \"UiRead\",\n    \"lastname\": \"Case\",\n    \"totalprice\": 151,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n      \"checkin\": \"2026-05-12\",\n      \"checkout\": \"2026-05-14\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:3001/booking\n200 (8 ms)\n",
+          "logs": "request:\n1 > POST http://localhost:3001/booking\n1 > Accept: application/json\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 170\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"UiRead\",\n  \"lastname\": \"Case\",\n  \"totalprice\": 151,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-14\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 18\n1 < 200 POST http://localhost:3001/booking\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"c5-Zk+uWycEsekZzmItGWfBvROpR8U\"\n1 < Connection: keep-alive\n1 < Content-Length: 197\n1 < Date: Fri, 15 May 2026 07:38:53 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"bookingid\": 54,\n  \"booking\": {\n    \"firstname\": \"UiRead\",\n    \"lastname\": \"Case\",\n    \"totalprice\": 151,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n      \"checkin\": \"2026-05-12\",\n      \"checkout\": \"2026-05-14\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:3001/booking\n200 (18 ms)\n",
           "hasEmbeds": false,
           "hasCallResults": false
         },
@@ -290,7 +290,7 @@
           "text": "webUrl",
           "line": 25,
           "status": "passed",
-          "durationMillis": 80,
+          "durationMillis": 161,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -301,7 +301,7 @@
           "text": "waitFor('[data-testid=login-shell]')",
           "line": 26,
           "status": "passed",
-          "durationMillis": 512,
+          "durationMillis": 525,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -312,7 +312,7 @@
           "text": "click('[data-testid=login-submit]')",
           "line": 27,
           "status": "passed",
-          "durationMillis": 10,
+          "durationMillis": 28,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -323,7 +323,7 @@
           "text": "waitFor('[data-testid=app-shell]')",
           "line": 28,
           "status": "passed",
-          "durationMillis": 41,
+          "durationMillis": 81,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -334,7 +334,7 @@
           "text": "click('[data-testid=nav-list]')",
           "line": 29,
           "status": "passed",
-          "durationMillis": 30,
+          "durationMillis": 44,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -356,7 +356,7 @@
           "text": "click('[data-testid=list-submit]')",
           "line": 32,
           "status": "passed",
-          "durationMillis": 2,
+          "durationMillis": 3,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -367,7 +367,7 @@
           "text": "waitForText('[data-testid=response-panel]', 'GET /booking IDs response')",
           "line": 33,
           "status": "passed",
-          "durationMillis": 2,
+          "durationMillis": 27,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -378,7 +378,7 @@
           "text": "clear('[data-testid=list-firstname]')",
           "line": 35,
           "status": "passed",
-          "durationMillis": 17,
+          "durationMillis": 6,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -389,7 +389,7 @@
           "text": "input('[data-testid=list-firstname]', 'UiRead')",
           "line": 36,
           "status": "passed",
-          "durationMillis": 84,
+          "durationMillis": 143,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -400,7 +400,7 @@
           "text": "click('[data-testid=list-submit]')",
           "line": 37,
           "status": "passed",
-          "durationMillis": 2,
+          "durationMillis": 15,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -411,7 +411,7 @@
           "text": "waitForText('[data-testid=booking-table-wrap]', 'UiRead')",
           "line": 38,
           "status": "passed",
-          "durationMillis": 1551,
+          "durationMillis": 1555,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -422,7 +422,7 @@
           "text": "waitForText('[data-testid=response-panel]', 'GET /booking IDs response')",
           "line": 39,
           "status": "passed",
-          "durationMillis": 2,
+          "durationMillis": 3,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -433,7 +433,7 @@
           "text": "clear('[data-testid=list-firstname]')",
           "line": 41,
           "status": "passed",
-          "durationMillis": 1,
+          "durationMillis": 2,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -444,7 +444,7 @@
           "text": "clear('[data-testid=list-lastname]')",
           "line": 42,
           "status": "passed",
-          "durationMillis": 13,
+          "durationMillis": 4,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -455,7 +455,7 @@
           "text": "input('[data-testid=list-lastname]', 'Case')",
           "line": 43,
           "status": "passed",
-          "durationMillis": 81,
+          "durationMillis": 164,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -466,7 +466,7 @@
           "text": "click('[data-testid=list-submit]')",
           "line": 44,
           "status": "passed",
-          "durationMillis": 17,
+          "durationMillis": 27,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -477,7 +477,7 @@
           "text": "waitForText('[data-testid=booking-table-wrap]', 'Case')",
           "line": 45,
           "status": "passed",
-          "durationMillis": 3,
+          "durationMillis": 55,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -488,7 +488,7 @@
           "text": "waitForText('[data-testid=response-panel]', 'GET /booking IDs response')",
           "line": 46,
           "status": "passed",
-          "durationMillis": 7,
+          "durationMillis": 15,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -499,7 +499,7 @@
           "text": "clear('[data-testid=list-lastname]')",
           "line": 48,
           "status": "passed",
-          "durationMillis": 2,
+          "durationMillis": 12,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -510,7 +510,7 @@
           "text": "input('[data-testid=list-checkin]', '2026-05-12')",
           "line": 49,
           "status": "passed",
-          "durationMillis": 18,
+          "durationMillis": 53,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -521,7 +521,7 @@
           "text": "input('[data-testid=list-checkout]', '2026-05-14')",
           "line": 50,
           "status": "passed",
-          "durationMillis": 8,
+          "durationMillis": 27,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -532,7 +532,7 @@
           "text": "click('[data-testid=list-submit]')",
           "line": 51,
           "status": "passed",
-          "durationMillis": 1,
+          "durationMillis": 9,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -543,7 +543,7 @@
           "text": "waitForText('[data-testid=booking-table-wrap]', 'UiRead')",
           "line": 52,
           "status": "passed",
-          "durationMillis": 1,
+          "durationMillis": 17,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -554,7 +554,7 @@
           "text": "waitForText('[data-testid=response-panel]', 'GET /booking IDs response')",
           "line": 53,
           "status": "passed",
-          "durationMillis": 2,
+          "durationMillis": 10,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -565,9 +565,9 @@
       "name": "Get booking detail by id and report not found id",
       "line": 55,
       "passed": true,
-      "durationMillis": 2544,
-      "startTime": 1778685535329,
-      "endTime": 1778685537873,
+      "durationMillis": 3366,
+      "startTime": 1778830736453,
+      "endTime": 1778830739819,
       "refId": "[2:55]",
       "sectionIndex": 2,
       "exampleIndex": -1,
@@ -647,9 +647,9 @@
           "text": "post",
           "line": 20,
           "status": "passed",
-          "durationMillis": 3,
+          "durationMillis": 18,
           "hasLogs": true,
-          "logs": "request:\n1 > POST http://localhost:3001/booking\n1 > Accept: application/json\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 170\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"UiRead\",\n  \"lastname\": \"Case\",\n  \"totalprice\": 151,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-14\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 0\n1 < 200 POST http://localhost:3001/booking\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"c5-eWEn9T52zrkIYZGy2UIEfyJMysA\"\n1 < Connection: keep-alive\n1 < Content-Length: 197\n1 < Date: Wed, 13 May 2026 15:18:55 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"bookingid\": 28,\n  \"booking\": {\n    \"firstname\": \"UiRead\",\n    \"lastname\": \"Case\",\n    \"totalprice\": 151,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n      \"checkin\": \"2026-05-12\",\n      \"checkout\": \"2026-05-14\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:3001/booking\n200 (0 ms)\n",
+          "logs": "request:\n1 > POST http://localhost:3001/booking\n1 > Accept: application/json\n1 > Content-Type: application/json; charset=UTF-8\n1 > Host: localhost:3001\n1 > Content-Length: 170\n1 > Connection: keep-alive\n1 > User-Agent: Apache-HttpClient/5.6.1 (Java/22.0.2)\n{\n  \"firstname\": \"UiRead\",\n  \"lastname\": \"Case\",\n  \"totalprice\": 151,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-05-12\",\n    \"checkout\": \"2026-05-14\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}\n\nresponse time in milliseconds: 3\n1 < 200 POST http://localhost:3001/booking\n1 < Keep-Alive: timeout=5\n1 < ETag: W/\"c5-/flzGQ78aU6AXtz/UW+HEMmEgO0\"\n1 < Connection: keep-alive\n1 < Content-Length: 197\n1 < Date: Fri, 15 May 2026 07:38:56 GMT\n1 < X-Powered-By: Express\n1 < Content-Type: application/json; charset=utf-8\n{\n  \"bookingid\": 55,\n  \"booking\": {\n    \"firstname\": \"UiRead\",\n    \"lastname\": \"Case\",\n    \"totalprice\": 151,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n      \"checkin\": \"2026-05-12\",\n      \"checkout\": \"2026-05-14\"\n    },\n    \"additionalneeds\": \"Breakfast\"\n  }\n}\n\nPOST http://localhost:3001/booking\n200 (3 ms)\n",
           "hasEmbeds": false,
           "hasCallResults": false
         },
@@ -681,7 +681,7 @@
           "text": "webUrl",
           "line": 56,
           "status": "passed",
-          "durationMillis": 250,
+          "durationMillis": 345,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -692,7 +692,7 @@
           "text": "waitFor('[data-testid=login-shell]')",
           "line": 57,
           "status": "passed",
-          "durationMillis": 516,
+          "durationMillis": 521,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -703,7 +703,7 @@
           "text": "click('[data-testid=login-submit]')",
           "line": 58,
           "status": "passed",
-          "durationMillis": 11,
+          "durationMillis": 27,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -714,7 +714,7 @@
           "text": "waitFor('[data-testid=app-shell]')",
           "line": 59,
           "status": "passed",
-          "durationMillis": 34,
+          "durationMillis": 72,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -725,7 +725,7 @@
           "text": "click('[data-testid=nav-detail]')",
           "line": 60,
           "status": "passed",
-          "durationMillis": 20,
+          "durationMillis": 50,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -736,7 +736,7 @@
           "text": "waitFor('[data-testid=detail-form]')",
           "line": 61,
           "status": "passed",
-          "durationMillis": 3,
+          "durationMillis": 10,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -747,7 +747,7 @@
           "text": "clear('[data-testid=detail-id]')",
           "line": 62,
           "status": "passed",
-          "durationMillis": 15,
+          "durationMillis": 3,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -758,7 +758,7 @@
           "text": "input('[data-testid=detail-id]', createdId)",
           "line": 63,
           "status": "passed",
-          "durationMillis": 33,
+          "durationMillis": 46,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -769,7 +769,7 @@
           "text": "click('[data-testid=detail-submit]')",
           "line": 64,
           "status": "passed",
-          "durationMillis": 12,
+          "durationMillis": 15,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -780,7 +780,7 @@
           "text": "waitForText('[data-testid=booking-detail]', 'UiRead Case')",
           "line": 65,
           "status": "passed",
-          "durationMillis": 509,
+          "durationMillis": 1551,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -791,7 +791,7 @@
           "text": "waitForText('[data-testid=response-json]', 'UiRead')",
           "line": 66,
           "status": "passed",
-          "durationMillis": 1,
+          "durationMillis": 2,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -802,7 +802,7 @@
           "text": "clear('[data-testid=detail-id]')",
           "line": 68,
           "status": "passed",
-          "durationMillis": 1,
+          "durationMillis": 8,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -813,7 +813,7 @@
           "text": "input('[data-testid=detail-id]', '999999')",
           "line": 69,
           "status": "passed",
-          "durationMillis": 80,
+          "durationMillis": 146,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -824,7 +824,7 @@
           "text": "click('[data-testid=detail-submit]')",
           "line": 70,
           "status": "passed",
-          "durationMillis": 11,
+          "durationMillis": 16,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -835,7 +835,7 @@
           "text": "waitForText('[data-testid=response-panel]', 'Request failed')",
           "line": 71,
           "status": "passed",
-          "durationMillis": 1034,
+          "durationMillis": 522,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false
@@ -846,7 +846,7 @@
           "text": "waitForText('[data-testid=response-json]', '404')",
           "line": 72,
           "status": "passed",
-          "durationMillis": 2,
+          "durationMillis": 3,
           "hasLogs": false,
           "hasEmbeds": false,
           "hasCallResults": false

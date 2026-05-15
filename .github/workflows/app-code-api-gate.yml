@@ -1,72 +1,4 @@
-# name: App Code API Gate
-
-# on:
-#   push:
-#     paths:
-#       - 'app-code/**'
-#       - 'karate-automation/karate/my_project/**'
-#       - '.github/workflows/app-code-api-gate.yml'
-#   pull_request:
-#     paths:
-#       - 'app-code/**'
-#       - 'karate-automation/karate/my_project/**'
-#       - '.github/workflows/app-code-api-gate.yml'
-
-# jobs:
-#   api-regression:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
-
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: '22'
-#           cache: 'npm'
-#           cache-dependency-path: app-code/package-lock.json
-
-#       - name: Install backend dependencies
-#         working-directory: app-code
-#         run: npm ci
-
-#       - name: Start Restful-Booker backend
-#         working-directory: app-code
-#         run: |
-#           npm start > ../restful-booker.log 2>&1 &
-
-#       - name: Wait for backend
-#         run: |
-#           for i in {1..30}; do
-#             if curl -fsS http://localhost:3001/ping >/dev/null; then
-#               exit 0
-#             fi
-#             sleep 2
-#           done
-#           cat restful-booker.log || true
-#           exit 1
-
-#       - name: Setup Java
-#         uses: actions/setup-java@v4
-#         with:
-#           distribution: temurin
-#           java-version: '21'
-#           cache: maven
-
-#       - name: Run f1 API Karate regression
-#         working-directory: karate-automation/karate/my_project
-#         run: mvn -B -ntp clean test -Dtest=ApiTest
-
-#       - name: Upload Karate report
-#         if: always()
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: karate-api-report
-#           path: karate-automation/karate/my_project/target/reports
-#           if-no-files-found: ignore
-
-name: App Code F4 Mock Gate
+name: App Code API Gate
 
 on:
   push:
@@ -81,12 +13,39 @@ on:
       - '.github/workflows/app-code-api-gate.yml'
 
 jobs:
-  f4-mock-testing:
+  api-regression:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: app-code/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: app-code
+        run: npm ci
+
+      - name: Start Restful-Booker backend
+        working-directory: app-code
+        run: |
+          npm start > ../restful-booker.log 2>&1 &
+
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:3001/ping >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat restful-booker.log || true
+          exit 1
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -95,14 +54,55 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Run f4 Mock Karate testing
+      - name: Run f1 API Karate regression
         working-directory: karate-automation/karate/my_project
-        run: mvn -B -ntp clean test -Dtest=MockRunner
+        run: mvn -B -ntp clean test -Dtest=ApiTest
 
       - name: Upload Karate report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: karate-f4-mock-report
+          name: karate-api-report
           path: karate-automation/karate/my_project/target/reports
           if-no-files-found: ignore
+
+# name: App Code F4 Mock Gate
+
+# on:
+#   push:
+#     paths:
+#       - 'app-code/**'
+#       - 'karate-automation/karate/my_project/**'
+#       - '.github/workflows/app-code-api-gate.yml'
+#   pull_request:
+#     paths:
+#       - 'app-code/**'
+#       - 'karate-automation/karate/my_project/**'
+#       - '.github/workflows/app-code-api-gate.yml'
+
+# jobs:
+#   f4-mock-testing:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Java
+#         uses: actions/setup-java@v4
+#         with:
+#           distribution: temurin
+#           java-version: '21'
+#           cache: maven
+
+#       - name: Run f4 Mock Karate testing
+#         working-directory: karate-automation/karate/my_project
+#         run: mvn -B -ntp clean test -Dtest=MockRunner
+
+#       - name: Upload Karate report
+#         if: always()
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: karate-f4-mock-report
+#           path: karate-automation/karate/my_project/target/reports
+#           if-no-files-found: ignore

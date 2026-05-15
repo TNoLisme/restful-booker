@@ -36,7 +36,7 @@ function fn() {
     return config;
   }
 
-  if (env === 'perf') {
+  if (env === 'f2_performance') {
     config.baseUrl = karate.properties['api.baseUrl'] || config.baseUrl;
     karate.configure('logging', { report: 'warn', console: 'warn' });
     karate.configure('matchEachEmptyAllowed', true);
