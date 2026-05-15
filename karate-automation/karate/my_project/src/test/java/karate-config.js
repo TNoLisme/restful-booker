@@ -31,7 +31,8 @@ function fn() {
   }
 
   if (env === 'api-local') {
-    config.baseUrl = karate.properties['api.baseUrl'] || config.baseUrl;
+    // Force localhost for F1 API tests - never use public URL
+    config.baseUrl = 'http://localhost:3001';
     config.authToken = null;
     return config;
   }
